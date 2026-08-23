@@ -7,6 +7,7 @@ import model.Appointment;
 import model.Patient;
 import model.Staff;
 
+
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -58,6 +59,7 @@ public class AppointmentResource {
         apt.setDentistId(request.getDentistId());
         apt.setTreatmentId(request.getTreatmentId());
         apt.setBookedByUsername(request.getBookedByUsername());
+        apt.setAppointmentDate(request.getAppointmentDate());
         apt.setAppointmentDate(request.getAppointmentDate());
 
         String timeStr = request.getAppointmentTime().trim();
