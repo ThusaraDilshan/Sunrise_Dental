@@ -3,20 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Sunrise Dental Clinic - Login</title>
-    <title>Sunrise Dental Clinic - Login</title>
-    <link rel="stylesheet" href="Resources/css/style.css">
+
+    <link rel="stylesheet" href="Assets/Css/login.css">
+    <script src="Assets/JS/index.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; background: #eef3f7; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-box { background: #ffffff; padding: 35px 40px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 320px; }
-        .login-box h2 { text-align: center; color: #17608a; margin-bottom: 5px; }
-        .login-box p.subtitle { text-align: center; color: #666; font-size: 13px; margin-top: 0; margin-bottom: 20px; }
-        .login-box label { display: block; margin-bottom: 5px; font-size: 14px; color: #333; }
-        .login-box input[type="text"], .login-box input[type="password"] { width: 100%; padding: 9px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        .login-box button { width: 100%; padding: 10px; background: #17608a; color: white; border: none; border-radius: 5px; font-size: 15px; cursor: pointer; }
-        .login-box button:hover { background: #124a6b; }
-        .login-box button:disabled { background: #9fb7c4; cursor: not-allowed; }
-        .error-msg { background: #fdecea; color: #b3261e; padding: 8px 10px; border-radius: 5px; font-size: 13px; margin-bottom: 15px; text-align: center; display: none; }
-        .hint { margin-top: 18px; font-size: 12px; color: #888; text-align: center; line-height: 1.5; }
+        
     </style>
 </head>
 <body>
@@ -44,72 +35,6 @@
     </div>
 
     <script>
-        // Backend REST API base URL (note the capital S and D - must match the deployed context root exactly)
-        const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
-
-        const form = document.getElementById('login-form');
-        const errorDiv = document.getElementById('error-msg');
-        const loginBtn = document.getElementById('login-btn');
-
-        function showError(message) {
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-        }
-
-        form.addEventListener('submit', function (e) {
-            e.preventDefault(); // stop normal form submission (which was going to LoginServlet)
-
-            errorDiv.style.display = 'none';
-            loginBtn.disabled = true;
-            loginBtn.textContent = 'Logging in...';
-
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
-
-            // LoginResource expects application/x-www-form-urlencoded @FormParam values
-            const body = new URLSearchParams();
-            body.append('username', username);
-            body.append('password', password);
-
-            fetch(`${BASE_URL}/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: body.toString()
-            })
-                .then(response => response.json().then(data => ({ ok: response.ok, data })))
-                .then(({ ok, data }) => {
-                    if (ok && data.status === 'success') {
-                        if (data.role === 'DENTIST') {
-                            window.location.href = `dentist_dash.html?id=${data.dentistId}&username=${encodeURIComponent(data.username)}`;
-                        } else if (data.role) {
-                            // Any staff-side role (ADMIN, COORDINATOR, RECEPTIONIST, TECHNOLOGIST, etc.)
-                            // all go to the same staff dashboard - the dashboard itself checks the
-                            // exact role to decide which admin-only controls to show.
-                            window.location.href = `staff_dash.html?user=${encodeURIComponent(data.username)}&role=${encodeURIComponent(data.role)}`;
-                        } else {
-                            showError('Unknown role returned from server.');
-                        }
-                    } else {
-                        showError(data.message || 'Invalid username or password.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Login error:', error);
-                    showError('Could not reach the server. Please try again.');
-                })
-                .finally(() => {
-                    loginBtn.disabled = false;
-                    loginBtn.textContent = 'Login';
-                });
-        });
-
-        // Check URL parameters for error message (e.g. ?error=... from old redirects, if any remain)
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('error')) {
-            showError(urlParams.get('error') || 'Invalid login details!');
-        }
     </script>
 </body>
 </html>

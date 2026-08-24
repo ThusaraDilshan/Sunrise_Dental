@@ -60,7 +60,6 @@ public class AppointmentResource {
         apt.setTreatmentId(request.getTreatmentId());
         apt.setBookedByUsername(request.getBookedByUsername());
         apt.setAppointmentDate(request.getAppointmentDate());
-        apt.setAppointmentDate(request.getAppointmentDate());
 
         String timeStr = request.getAppointmentTime().trim();
         if (timeStr.length() == 4) {

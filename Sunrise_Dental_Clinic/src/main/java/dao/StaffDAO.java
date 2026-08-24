@@ -19,6 +19,17 @@ public class StaffDAO {
         }
         return null;
     }
+    
+    public class StaffDAO {
+
+    // Used by LoginServlet / LoginResource to authenticate staff
+    public Staff validateLogin(String username, String password) {
+        Staff staff = findByUsername(username);
+        if (staff != null && staff.getPassword() != null && staff.getPassword().equals(password)) {
+            return staff;
+        }
+        return null;
+    }
 
     // Used by login and by the dashboard to find out the current user's role
     public Staff findByUsername(String username) {
