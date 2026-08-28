@@ -13,17 +13,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
-/**
- * Serves the dropdown data that staff_dash.html expects at:
- *   GET api/dropdown/dentists
- *   GET api/dropdown/treatments
- *
- * Map this in web.xml (if not using annotations) as:
- *   <servlet-mapping>
- *       <servlet-name>DropdownServlet</servlet-name>
- *       <url-pattern>/api/dropdown/*</url-pattern>
- *   </servlet-mapping>
- */
 @WebServlet("/api/dropdown/*")
 public class DropDownServlet extends HttpServlet {
 
@@ -36,7 +25,7 @@ public class DropDownServlet extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        String pathInfo = request.getPathInfo(); // "/dentists" or "/treatments"
+        String pathInfo = request.getPathInfo();
 
         PrintWriter out = response.getWriter();
 

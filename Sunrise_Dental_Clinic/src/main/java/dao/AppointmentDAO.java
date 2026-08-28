@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AppointmentDAO {
-
-    // 1. Staff Dashboard (සියලුම Appointments)
     public List<Appointment> getAllAppointments() {
         List<Appointment> list = new ArrayList<>();
         String sql = "SELECT a.*, p.patient_name, p.contact_no, p.address, d.dentist_name, t.treatment_name " +
@@ -33,7 +31,6 @@ public class AppointmentDAO {
         return list;
     }
     
-    // 1. Staff Dashboard (සියලුම Appointments)
     public List<Appointment> getAllAppointments() {
         List<Appointment> list = new ArrayList<>();
         String sql = "SELECT a.*, p.patient_name, p.contact_no, p.address, d.dentist_name, t.treatment_name " +
@@ -56,8 +53,8 @@ public class AppointmentDAO {
         }
         return list;
     }
-
-    // 2. Dentist Dashboard (Dentist ID එකට අදාළ Appointments)
+    
+    
     public List<Appointment> getAppointmentsByDentistId(int dentistId) {
         List<Appointment> list = new ArrayList<>();
         String sql = "SELECT a.*, p.patient_name, p.contact_no, p.address, d.dentist_name, t.treatment_name " +
@@ -84,7 +81,6 @@ public class AppointmentDAO {
         return list;
     }
 
-    // 3. Appointment Number එකෙන් Search කිරීම
     public Appointment getAppointmentByNo(String appointmentNo) {
         String sql = "SELECT a.*, p.patient_name, p.contact_no, p.address, d.dentist_name, t.treatment_name " +
                      "FROM appointments a " +
@@ -109,7 +105,6 @@ public class AppointmentDAO {
         return null;
     }
 
-    // 4. Billing Details එකතු කරගත් Appointment එකක් ගැනීම
     public Appointment getAppointmentWithBillingDetails(String appointmentNo) {
         String sql = "SELECT a.*, p.patient_name, p.contact_no, p.address, d.dentist_name, d.consultation_fee, " +
                      "t.treatment_name, t.treatment_cost " +
@@ -136,11 +131,7 @@ public class AppointmentDAO {
         }
         return null;
     }
-
-    // 5. Auto Generate Appointment Number
-    //    Uses the highest existing appointment_no + 1 (not COUNT(*)), so that
-    //    deleting appointments never causes a duplicate/collided number to be
-    //    generated for a new appointment.
+    
     public String generateNextAppointmentNo() {
         String sql = "SELECT appointment_no FROM appointments " +
                       "ORDER BY CAST(SUBSTRING(appointment_no, 4) AS UNSIGNED) DESC LIMIT 1";
@@ -160,7 +151,6 @@ public class AppointmentDAO {
         return "APT0001";
     }
 
-    // 6. Appointment එක Save කිරීම
     public boolean registerAppointment(Appointment apt) {
         String sql = "INSERT INTO appointments (appointment_no, patient_id, dentist_id, treatment_id, " +
                      "booked_by_username, appointment_date, appointment_time, status) " +
@@ -186,7 +176,6 @@ public class AppointmentDAO {
         }
     }
 
-    // 7. Update Appointment Status (used by Dentist Dashboard Accept / Cancel buttons)
     public boolean updateStatus(String appointmentNo, String newStatus) {
         String sql = "UPDATE appointments SET status = ? WHERE appointment_no = ?";
         Connection conn = DBConnection.getInstance().getConnection();
@@ -203,9 +192,6 @@ public class AppointmentDAO {
         }
     }
 
-    // 8. Full Update of an Appointment (used by Staff Dashboard Edit button)
-    //    Updates the linked patient's name/contact along with the appointment's
-    //    dentist, treatment, date and time.
     public boolean updateAppointment(String appointmentNo, String patientName, String contactNo,
                                       String address, int dentistId, int treatmentId,
                                       String appointmentDate, String appointmentTime) {
@@ -225,7 +211,7 @@ public class AppointmentDAO {
                     if (rs.next()) {
                         patientId = rs.getInt("patient_id");
                     } else {
-                        return false; // appointment doesn't exist
+                        return false;
                     }
                 }
             }
@@ -254,8 +240,6 @@ public class AppointmentDAO {
         }
     }
 
-    // 9. Delete Appointment (used by Staff Dashboard Delete button)
-    //    Removes any bill tied to the appointment first to satisfy the FK constraint.
     public boolean deleteAppointment(String appointmentNo) {
         String deleteBillSql = "DELETE FROM bills WHERE appointment_no = ?";
         String deleteAptSql = "DELETE FROM appointments WHERE appointment_no = ?";
@@ -278,7 +262,6 @@ public class AppointmentDAO {
         }
     }
 
-    // Safe Data Mapping (No appointment_id dependency)
     private Appointment mapResultSetToAppointment(ResultSet rs) throws SQLException {
         Appointment apt = new Appointment();
         apt.setAppointmentNo(rs.getString("appointment_no"));

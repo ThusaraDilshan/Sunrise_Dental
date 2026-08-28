@@ -11,10 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NoticeDAO {
-
-    // Staff sends a notice to one specific dentist.
-    // notice_id (auto increment), is_read (default 0) and created_at
-    // (default CURRENT_TIMESTAMP) are left for the DB to fill in.
     public boolean addNotice(Notice notice) {
         String sql = "INSERT INTO notices (dentist_id, description, sent_by) VALUES (?, ?, ?)";
         Connection conn = DBConnection.getInstance().getConnection();
@@ -70,6 +66,28 @@ public class NoticeDAO {
         return notices;
     }
 
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, dentistId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    notices.add(new Notice(
+                            rs.getInt("notice_id"),
+                            rs.getInt("dentist_id"),
+                            rs.getString("description"),
+                            rs.getString("sent_by"),
+                            rs.getBoolean("is_read"),
+                            String.valueOf(rs.getTimestamp("created_at"))
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error in getNoticesByDentistId: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return notices;
+    }
+    
     public boolean markAsRead(int noticeId) {
         String sql = "UPDATE notices SET is_read = 1 WHERE notice_id = ?";
         Connection conn = DBConnection.getInstance().getConnection();

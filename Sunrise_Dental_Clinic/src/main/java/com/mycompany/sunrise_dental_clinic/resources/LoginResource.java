@@ -34,26 +34,6 @@ public class LoginResource {
             result.put("message", "Username and Password are required.");
             return Response.status(Response.Status.BAD_REQUEST).entity(result).build();
         }
-        
-        @Path("/login")
-public class LoginResource {
-
-    private final StaffDAO staffDAO = new StaffDAO();
-    private final DentistDAO dentistDAO = new DentistDAO();
-
-    @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response handleLogin(@FormParam("username") String username, 
-                                @FormParam("password") String password) {
-
-        Map<String, Object> result = new HashMap<>();
-
-        if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
-            result.put("status", "error");
-            result.put("message", "Username and Password are required.");
-            return Response.status(Response.Status.BAD_REQUEST).entity(result).build();
-        }
 
         try {
             // 1. Check Staff Login
