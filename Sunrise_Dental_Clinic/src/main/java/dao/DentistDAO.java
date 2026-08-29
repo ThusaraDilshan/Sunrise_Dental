@@ -36,34 +36,6 @@ public class DentistDAO {
         }
         return null;
     }
-    
-    public Dentist validateLogin(String username, String password) {
-        String sql = "SELECT * FROM dentists WHERE username = ? AND password = ?";
-        Connection conn = DBConnection.getInstance().getConnection();
-
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, username);
-            ps.setString(2, password);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return new Dentist(
-                            rs.getInt("dentist_id"),
-                            rs.getString("dentist_name"),
-                            rs.getString("username"),
-                            rs.getString("password"),
-                            rs.getString("specialization"),
-                            rs.getString("contact_no"),
-                            rs.getDouble("consultation_fee")
-                    );
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error in validateLogin: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     public boolean addDentist(Dentist d) {
         String sql = "INSERT INTO dentists (dentist_name, username, password, specialization, contact_no, consultation_fee) VALUES (?, ?, ?, ?, ?, ?)";

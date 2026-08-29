@@ -31,30 +31,6 @@ public class AppointmentDAO {
         return list;
     }
     
-    public List<Appointment> getAllAppointments() {
-        List<Appointment> list = new ArrayList<>();
-        String sql = "SELECT a.*, p.patient_name, p.contact_no, p.address, d.dentist_name, t.treatment_name " +
-                     "FROM appointments a " +
-                     "JOIN patients p ON a.patient_id = p.patient_id " +
-                     "JOIN dentists d ON a.dentist_id = d.dentist_id " +
-                     "JOIN treatment_types t ON a.treatment_id = t.treatment_id " +
-                     "ORDER BY a.appointment_date DESC, a.appointment_time DESC";
-
-        try (Connection conn = DBConnection.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                Appointment apt = mapResultSetToAppointment(rs);
-                list.add(apt);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-    
-    
     public List<Appointment> getAppointmentsByDentistId(int dentistId) {
         List<Appointment> list = new ArrayList<>();
         String sql = "SELECT a.*, p.patient_name, p.contact_no, p.address, d.dentist_name, t.treatment_name " +

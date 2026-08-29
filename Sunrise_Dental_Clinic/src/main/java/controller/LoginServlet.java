@@ -36,23 +36,8 @@ public class LoginServlet extends HttpServlet {
             return;
         }
         
-        @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
-
-        if (username == null || username.trim().isEmpty()
-                || password == null || password.trim().isEmpty()) {
-            String errorMsg = URLEncoder.encode("Username and Password are required.", StandardCharsets.UTF_8);
-            response.sendRedirect("index.html?error=" + errorMsg);
-            return;
-        }
-
         HttpSession session = request.getSession(true);
 
-        // 1. Try STAFF login
         Staff staff = staffDAO.validateLogin(username, password);
         if (staff != null) {
             String staffRole = staff.getRole() != null ? staff.getRole().toUpperCase() : "STAFF";

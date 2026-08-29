@@ -36,37 +36,13 @@ public class NoticeDAO {
             return false;
         }
     }
-
-    // All notices sent to a given dentist, newest first.
-    // (Useful for a dentist-side "My Notices" panel later on.)
+    
     public List<Notice> getNoticesByDentistId(int dentistId) {
         List<Notice> notices = new ArrayList<>();
         String sql = "SELECT * FROM notices WHERE dentist_id = ? ORDER BY created_at DESC";
         Connection conn = DBConnection.getInstance().getConnection();
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, dentistId);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    notices.add(new Notice(
-                            rs.getInt("notice_id"),
-                            rs.getInt("dentist_id"),
-                            rs.getString("description"),
-                            rs.getString("sent_by"),
-                            rs.getBoolean("is_read"),
-                            String.valueOf(rs.getTimestamp("created_at"))
-                    ));
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error in getNoticesByDentistId: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return notices;
-    }
-
-    try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, dentistId);
 
             try (ResultSet rs = ps.executeQuery()) {

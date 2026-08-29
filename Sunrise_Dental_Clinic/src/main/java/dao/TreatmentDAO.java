@@ -34,6 +34,28 @@ public class TreatmentDAO {
         }
         return list;
     }
+    
+     public List<TreatmentType> getAllTreatments() {
+        List<TreatmentType> list = new ArrayList<>();
+        String sql = "SELECT treatment_id, treatment_name, treatment_cost FROM treatment_types ORDER BY treatment_name";
+
+        Connection conn = DBConnection.getInstance().getConnection();
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                TreatmentType t = new TreatmentType();
+                t.setTreatmentId(rs.getInt("treatment_id"));
+                t.setTreatmentName(rs.getString("treatment_name"));
+                t.setTreatmentCost(rs.getBigDecimal("treatment_cost"));
+                list.add(t);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching treatments: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return list;
+    }
 
     public int addTreatment(TreatmentType t) {
         String sql = "INSERT INTO treatment_types (treatment_name, treatment_cost) VALUES (?, ?)";
