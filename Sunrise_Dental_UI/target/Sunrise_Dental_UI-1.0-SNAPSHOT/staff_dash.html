@@ -12,22 +12,21 @@
 
 <div class="layout">
     <div class="sidebar">
-        <div class="brand">
-            <div class="logo">🦷</div>
+        <div class="brand" onclick="showSection('sec-appointments')" style="cursor:pointer;">
             <span>Sunrise Dental</span>
         </div>
-        <div class="nav-item active" data-target="sec-appointments"><span class="ic">📅</span> Appointments</div>
-        <div class="nav-item" data-target="sec-register"><span class="ic">➕</span> Register Appointment</div>
-        <div class="nav-item" data-target="sec-dentists"><span class="ic">👨‍⚕️</span> Dentists</div>
-        <div class="nav-item" data-target="sec-treatments"><span class="ic">💉</span> Treatments</div>
-        <div class="nav-item" data-target="sec-patients"><span class="ic">🧑‍🤝‍🧑</span> Patients</div>
-        <div class="nav-item" data-target="sec-staff"><span class="ic">👥</span> Staff Members</div>
-        <div class="nav-item" data-target="sec-bill"><span class="ic">💳</span> Calculate &amp; Print Bill</div>
-        <div class="nav-item" data-target="sec-notices"><span class="ic">📢</span> Notices</div>
-        <div class="nav-item" data-target="sec-profile"><span class="ic">⚙️</span> Profile Settings</div>
-        <div class="nav-item" data-target="sec-help"><span class="ic">❓</span> Help</div>
+        <div class="nav-item active" data-target="sec-appointments"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> Appointments</div>
+        <div class="nav-item" data-target="sec-register"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span> Register Appointment</div>
+        <div class="nav-item" data-target="sec-dentists"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-2.2 0-3.5 1.1-4.7 1.1C5.9 4.1 4 5.6 4 8.3c0 2 .7 3.2 1.1 5 .4 1.9.6 4.9 1.9 6.5.6.8 1.3 1.2 1.9 1.2.9 0 1.1-2.4 1.4-3.8.2-1 .5-1.7 1.1-1.7s.9.7 1.1 1.7c.3 1.4.5 3.8 1.4 3.8.6 0 1.3-.4 1.9-1.2 1.3-1.6 1.5-4.6 1.9-6.5.4-1.8 1.1-3 1.1-5 0-2.7-1.9-4.2-3.8-4.2C15.5 4.1 14.2 3 12 3z"/></svg></span> Dentists</div>
+        <div class="nav-item" data-target="sec-treatments"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="2" x2="22" y2="6"/><line x1="17" y1="7" x2="7" y2="17"/><line x1="14" y1="4" x2="20" y2="10"/><line x1="4" y1="20" x2="7" y2="17"/><line x1="9" y1="12" x2="12" y2="15"/><line x1="6" y1="15" x2="9" y2="18"/></svg></span> Treatments</div>
+        <div class="nav-item" data-target="sec-patients"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M4 20c0-3 2.5-5 5-5s5 2 5 5"/><circle cx="17" cy="9" r="2.3"/><path d="M15.5 14c2 .2 3.5 1.8 3.9 4"/></svg></span> Patients</div>
+        <div class="nav-item" data-target="sec-staff"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="2"/><circle cx="12" cy="10" r="2.3"/><path d="M9 16.5c0-1.6 1.3-2.5 3-2.5s3 .9 3 2.5"/><line x1="10" y1="7" x2="14" y2="7"/></svg></span> Staff Members</div>
+        <div class="nav-item" data-target="sec-bill"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg></span> Calculate &amp; Print Bill</div>
+        <div class="nav-item" data-target="sec-notices"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4a1 1 0 0 0 1 1h2l6 4V5L6 9H4a1 1 0 0 0-1 1z"/><path d="M15 8a4 4 0 0 1 0 8"/><path d="M18 5a8 8 0 0 1 0 14"/></svg></span> Notices</div>
+        <div class="nav-item" data-target="sec-profile"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.9 7.9 0 0 0 0-2l2-1.5-2-3.4-2.4.6a8 8 0 0 0-1.7-1L15 3h-4l-.3 2.5a8 8 0 0 0-1.7 1l-2.4-.6-2 3.4L6.6 11a7.9 7.9 0 0 0 0 2l-2 1.5 2 3.4 2.4-.6a8 8 0 0 0 1.7 1L11 21h4l.3-2.5a8 8 0 0 0 1.7-1l2.4.6 2-3.4z"/></svg></span> Profile Settings</div>
+        <div class="nav-item" data-target="sec-help"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 1 1 4.9 2.3c-.8.6-1.5 1.1-1.5 2.2"/><line x1="12" y1="17" x2="12" y2="17.1"/></svg></span> Help</div>
         <div class="nav-divider"></div>
-        <div class="nav-item" id="logoutBtn"><span class="ic">🚪</span> Log Out</div>
+        <div class="nav-item" id="logoutBtn"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><line x1="16" y1="17" x2="21" y2="12"/><line x1="21" y1="12" x2="16" y2="7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Log Out</div>
     </div>
 
     <div class="main">
@@ -50,16 +49,6 @@
                     </div>
                     <button class="btn-primary" onclick="showSection('sec-register')">+ Add Appointment</button>
                 </div>    
-                
-                <div class="section active" id="sec-appoints">
-            <div class="card">
-                <div class="card-header-row">
-                    <div>
-                        <h2>Appointments</h2>
-                        <div class="sub">All registered appointments</div>
-                    </div>
-                    <button class="btn-primary" onclick="showSection('sec-register')">+ Add Appointment</button>
-                </div>  
                 
                 <div class="search-row">
                     <input type="text" id="searchAptNo" placeholder="Enter Appointment No or Name..." onkeyup="filterSearchTable()">
@@ -415,7 +404,7 @@
                     <div class="invoice-header">
                         <div>
                             <div class="invoice-logo">
-                                <div class="icon">🦷</div>
+                                <div class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-2.2 0-3.5 1.1-4.7 1.1C5.9 4.1 4 5.6 4 8.3c0 2 .7 3.2 1.1 5 .4 1.9.6 4.9 1.9 6.5.6.8 1.3 1.2 1.9 1.2.9 0 1.1-2.4 1.4-3.8.2-1 .5-1.7 1.1-1.7s.9.7 1.1 1.7c.3 1.4.5 3.8 1.4 3.8.6 0 1.3-.4 1.9-1.2 1.3-1.6 1.5-4.6 1.9-6.5.4-1.8 1.1-3 1.1-5 0-2.7-1.9-4.2-3.8-4.2C15.5 4.1 14.2 3 12 3z"/></svg></div>
                                 <span class="invoice-title">Sunrise Dental Clinic</span>
                             </div>
                             <div style="color: #64748b; font-size: 12px; margin-top: 4px;">58/18, Highlevel Road, Colombo | Tel: 0112 555 888</div>
@@ -447,7 +436,7 @@
                     
                     <div class="print-btn-row">
                         <button class="btn-primary" style="background:#64748b;" onclick="backToBillList()">Cancel</button>
-                        <button class="btn-primary" onclick="window.print()">🖨️ Print Receipt</button>
+                        <button class="btn-primary" onclick="window.print()" style="display:inline-flex; align-items:center; gap:6px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><rect x="4" y="9" width="16" height="8" rx="1"/><path d="M6 17v4h12v-4"/></svg> Print Receipt</button>
                     </div>
                 </div>
             </div>
@@ -528,17 +517,150 @@
 
         <div class="section" id="sec-help">
             <div class="card">
-                <h2>Help</h2>
-                <div class="sub">Quick guide for staff</div>
-                <ol style="font-size:13px; line-height:1.9; color:#4b5160;">
-                    <li><b>Appointments</b> — View all registered appointments and use the built-in search bar to filter records instantly.</li>
-                    <li><b>Register Appointment</b> — Fill out and submit patient booking details directly within the dashboard.</li>
-                    <li><b>Dentists</b> — View, add, update, or remove dentist profiles dynamically with real-time search support.</li>
-                    <li><b>Staff Management</b> — Search and view all staff members. Admin users can create, edit, or remove staff accounts.</li>
-                    <li><b>Calculate &amp; Print Bill</b> — Enter an appointment number to calculate total cost and print clean receipts.</li>
-                    <li><b>Notices</b> — Select a dentist and send a notice or message directly to them.</li>
-                    <li><b>Profile Settings</b> — View your account details and update your name, contact number, or password.</li>
-                </ol>
+                <h2>Staff Portal Guide</h2>
+                <div class="sub">Click on any topic below to see more details</div>
+
+                <div class="help-list">
+                    <details class="help-item" open>
+                        <summary>
+                            <span class="help-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+                            <span class="help-summary-text">
+                                <span class="help-title">Appointments</span>
+                                <span class="help-blurb">View and manage every registered appointment</span>
+                            </span>
+                            <span class="chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </summary>
+                        <div class="help-detail">
+                            Lists every appointment across the clinic with patient details, dentist, treatment, date, time and status. Use the search bar to instantly filter by appointment number or patient name, and click + Add Appointment to book a new slot straight from this page.
+                        </div>
+                    </details>
+
+                    <details class="help-item">
+                        <summary>
+                            <span class="help-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span>
+                            <span class="help-summary-text">
+                                <span class="help-title">Register Appointment</span>
+                                <span class="help-blurb">Book a new patient visit in a few steps</span>
+                            </span>
+                            <span class="chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </summary>
+                        <div class="help-detail">
+                            Enter the patient's name, address and contact number, then choose the dentist, treatment type, date and time. Click Submit &amp; Save Appointment to confirm the booking, or Cancel to discard the form without saving.
+                        </div>
+                    </details>
+
+                    <details class="help-item">
+                        <summary>
+                            <span class="help-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-2.2 0-3.5 1.1-4.7 1.1C5.9 4.1 4 5.6 4 8.3c0 2 .7 3.2 1.1 5 .4 1.9.6 4.9 1.9 6.5.6.8 1.3 1.2 1.9 1.2.9 0 1.1-2.4 1.4-3.8.2-1 .5-1.7 1.1-1.7s.9.7 1.1 1.7c.3 1.4.5 3.8 1.4 3.8.6 0 1.3-.4 1.9-1.2 1.3-1.6 1.5-4.6 1.9-6.5.4-1.8 1.1-3 1.1-5 0-2.7-1.9-4.2-3.8-4.2C15.5 4.1 14.2 3 12 3z"/></svg></span>
+                            <span class="help-summary-text">
+                                <span class="help-title">Dentists</span>
+                                <span class="help-blurb">Manage clinic dentist profiles and login accounts</span>
+                            </span>
+                            <span class="chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </summary>
+                        <div class="help-detail">
+                            Search dentists by name or specialization, or click + Add New Dentist to create a profile with their specialization, contact number, consultation fee and login credentials. Each row's Actions let you edit or remove that dentist.
+                        </div>
+                    </details>
+
+                    <details class="help-item">
+                        <summary>
+                            <span class="help-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="2" x2="22" y2="6"/><line x1="17" y1="7" x2="7" y2="17"/><line x1="14" y1="4" x2="20" y2="10"/><line x1="4" y1="20" x2="7" y2="17"/><line x1="9" y1="12" x2="12" y2="15"/><line x1="6" y1="15" x2="9" y2="18"/></svg></span>
+                            <span class="help-summary-text">
+                                <span class="help-title">Treatments</span>
+                                <span class="help-blurb">Keep the list of treatment types and prices current</span>
+                            </span>
+                            <span class="chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </summary>
+                        <div class="help-detail">
+                            Search existing treatments by name or click + Add Treatment to define a new one with its cost. These treatment types populate the dropdown used when registering appointments and calculating bills, so keep prices up to date.
+                        </div>
+                    </details>
+
+                    <details class="help-item">
+                        <summary>
+                            <span class="help-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M4 20c0-3 2.5-5 5-5s5 2 5 5"/><circle cx="17" cy="9" r="2.3"/><path d="M15.5 14c2 .2 3.5 1.8 3.9 4"/></svg></span>
+                            <span class="help-summary-text">
+                                <span class="help-title">Patients</span>
+                                <span class="help-blurb">View and correct patient contact records</span>
+                            </span>
+                            <span class="chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </summary>
+                        <div class="help-detail">
+                            Every patient who has ever booked an appointment appears here. Search by name or contact number, then use the row Actions to edit a patient's address or contact details, for example if they moved or changed their phone number.
+                        </div>
+                    </details>
+
+                    <details class="help-item">
+                        <summary>
+                            <span class="help-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="2"/><circle cx="12" cy="10" r="2.3"/><path d="M9 16.5c0-1.6 1.3-2.5 3-2.5s3 .9 3 2.5"/><line x1="10" y1="7" x2="14" y2="7"/></svg></span>
+                            <span class="help-summary-text">
+                                <span class="help-title">Staff Members</span>
+                                <span class="help-blurb">Search staff accounts, or manage them if you're an Admin</span>
+                            </span>
+                            <span class="chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </summary>
+                        <div class="help-detail">
+                            Search staff by name, username or role to see who works at the clinic and what they do. If you're logged in as an Admin, a + Add New Staff button also appears here, letting you create, edit or remove staff accounts and assign roles like Coordinator, Receptionist, Nurse or Technologist.
+                        </div>
+                    </details>
+
+                    <details class="help-item">
+                        <summary>
+                            <span class="help-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg></span>
+                            <span class="help-summary-text">
+                                <span class="help-title">Calculate &amp; Print Bill</span>
+                                <span class="help-blurb">Generate and print a receipt for a completed visit</span>
+                            </span>
+                            <span class="chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </summary>
+                        <div class="help-detail">
+                            Search a completed appointment by appointment number, patient name or contact number to bring up its receipt, which combines the treatment fee and consultation fee into a total amount due. Click Print Receipt to print a clean copy for the patient, or Cancel to go back to the list.
+                        </div>
+                    </details>
+
+                    <details class="help-item">
+                        <summary>
+                            <span class="help-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4a1 1 0 0 0 1 1h2l6 4V5L6 9H4a1 1 0 0 0-1 1z"/><path d="M15 8a4 4 0 0 1 0 8"/><path d="M18 5a8 8 0 0 1 0 14"/></svg></span>
+                            <span class="help-summary-text">
+                                <span class="help-title">Notices</span>
+                                <span class="help-blurb">Send a message directly to a dentist</span>
+                            </span>
+                            <span class="chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </summary>
+                        <div class="help-detail">
+                            Select the dentist you want to reach, type your message — a schedule change, reminder or general note — and click Send Notice. The notice appears in that dentist's portal and only they will see it.
+                        </div>
+                    </details>
+
+                    <details class="help-item">
+                        <summary>
+                            <span class="help-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.9 7.9 0 0 0 0-2l2-1.5-2-3.4-2.4.6a8 8 0 0 0-1.7-1L15 3h-4l-.3 2.5a8 8 0 0 0-1.7 1l-2.4-.6-2 3.4L6.6 11a7.9 7.9 0 0 0 0 2l-2 1.5 2 3.4 2.4-.6a8 8 0 0 0 1.7 1L11 21h4l.3-2.5a8 8 0 0 0 1.7-1l2.4.6 2-3.4z"/></svg></span>
+                            <span class="help-summary-text">
+                                <span class="help-title">Profile Settings</span>
+                                <span class="help-blurb">Keep your own contact and account details up to date</span>
+                            </span>
+                            <span class="chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </summary>
+                        <div class="help-detail">
+                            Your Staff ID, role and username are fixed and shown for reference only. Update your full name or contact number at any time. To change your password, type a new one into the New Password field — leave it blank to keep your current password — then click Save Changes.
+                        </div>
+                    </details>
+
+                    <details class="help-item">
+                        <summary>
+                            <span class="help-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><line x1="16" y1="17" x2="21" y2="12"/><line x1="21" y1="12" x2="16" y2="7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
+                            <span class="help-summary-text">
+                                <span class="help-title">Log Out</span>
+                                <span class="help-blurb">Safely end your session when you're done</span>
+                            </span>
+                            <span class="chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </summary>
+                        <div class="help-detail">
+                            Clears your current session completely and returns you to the login screen. Always log out when you're finished, especially on a shared or public computer, to keep patient and staff information secure.
+                        </div>
+                    </details>
+                </div>
             </div>
         </div>
     </div>

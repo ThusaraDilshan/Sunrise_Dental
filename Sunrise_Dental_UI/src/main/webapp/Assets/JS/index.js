@@ -4,6 +4,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('login-form');
     const errorDiv = document.getElementById('error-msg');
     const loginBtn = document.getElementById('login-btn');
+    const usernameField = document.getElementById('username');
+    const passwordField = document.getElementById('password');
+    const rememberBox = document.getElementById('remember-me');
+    const toggleEye = document.getElementById('toggle-eye');
+    const forgotLink = document.getElementById('forgot-link');
 
     function showError(message) {
         if (errorDiv) {
@@ -12,16 +17,47 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // ---- Remember Me: prefill saved username on page load ----
+    const savedUsername = localStorage.getItem('sunrise_remember_username');
+    if (savedUsername && usernameField) {
+        usernameField.value = savedUsername;
+        if (rememberBox) rememberBox.checked = true;
+    }
+
+    // ---- Show / hide password ----
+    if (toggleEye && passwordField) {
+        toggleEye.addEventListener('click', function () {
+            const isHidden = passwordField.type === 'password';
+            passwordField.type = isHidden ? 'text' : 'password';
+            toggleEye.style.color = isHidden ? '#17608a' : '#33404a';
+        });
+    }
+
+    // ---- Forgot password (no backend flow yet - simple hint only) ----
+    if (forgotLink) {
+        forgotLink.addEventListener('click', function (e) {
+            e.preventDefault();
+            alert('Please contact the clinic administrator to reset your password.');
+        });
+    }
+
     if (form) {
         form.addEventListener('submit', function (e) {
-            e.preventDefault(); // stop normal form submission
+            e.preventDefault();
 
             errorDiv.style.display = 'none';
             loginBtn.disabled = true;
             loginBtn.textContent = 'Logging in...';
 
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
+            const username = usernameField.value.trim();
+            const password = passwordField.value;
+
+            // Save or clear the remembered username
+            if (rememberBox && rememberBox.checked) {
+                localStorage.setItem('sunrise_remember_username', username);
+            } else {
+                localStorage.removeItem('sunrise_remember_username');
+            }
 
             const body = new URLSearchParams();
             body.append('username', username);
@@ -59,7 +95,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Check URL parameters for error message
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('error')) {
         showError(urlParams.get('error') || 'Invalid login details!');

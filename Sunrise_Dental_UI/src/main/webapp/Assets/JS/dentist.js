@@ -1,4 +1,4 @@
-    const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
+const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
 
 var loggedDentistId = null;
 var loggedDentistName = "Dentist";
@@ -8,6 +8,39 @@ var lastFetchedAppointments = [];
 var lastReportDayList = [];
 var lastReportDate = '';
 var lastReportStats = null;
+
+// Assigns each dentist their own sequential appointment numbers (APT0001, APT0002, ...)
+// based on creation order, independent of the clinic-wide appointment number used in the backend.
+// The real backend appointmentNo (a.appointmentNo) is kept for all API calls (status update, search),
+// while a.localAptNo is only used for display.
+// Filter state for the All Appointments table's status filter dropdown
+var currentStatusFilter = 'ALL';
+
+// Sorts a list of appointments chronologically: earliest date first, and
+// within the same date, earliest time first.
+function sortAppointmentsByDateTime(list) {
+    return (list || []).slice().sort((a, b) => {
+        var aDate = a.appointmentDate || a.appointment_date || '';
+        var bDate = b.appointmentDate || b.appointment_date || '';
+        if (aDate !== bDate) return aDate < bDate ? -1 : 1;
+        var aTime = a.appointmentTime || a.appointment_time || '';
+        var bTime = b.appointmentTime || b.appointment_time || '';
+        if (aTime === bTime) return 0;
+        return aTime < bTime ? -1 : 1;
+    });
+}
+
+function assignLocalAppointmentNumbers(list) {
+    var sorted = (list || []).slice().sort((a, b) => {
+        var aNum = parseInt((a.appointmentNo || '').toString().replace(/[^0-9]/g, ''), 10) || 0;
+        var bNum = parseInt((b.appointmentNo || '').toString().replace(/[^0-9]/g, ''), 10) || 0;
+        return aNum - bNum;
+    });
+    sorted.forEach((a, idx) => {
+        a.localAptNo = 'APT' + String(idx + 1).padStart(4, '0');
+    });
+    return list;
+}
 
 document.addEventListener("DOMContentLoaded", function () {
     var params = new URLSearchParams(window.location.search);
@@ -151,16 +184,20 @@ function loadDentistAppointments(onDone) {
     var tbody = document.getElementById('dentistAppointmentsTableBody');
 
     if (!loggedDentistId) {
-        if (tbody) tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#d33; padding:24px;">Could not identify the logged-in dentist. Please log out and log in again.</td></tr>';
+        if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#d33; padding:24px;">Could not identify the logged-in dentist. Please log out and log in again.</td></tr>';
         return;
     }
 
-    if (tbody) tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#9aa0ab; padding:24px;">Loading schedule...</td></tr>';
+    if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#9aa0ab; padding:24px;">Loading schedule...</td></tr>';
 
     fetch(BASE_URL + '/appointment/by-dentist/' + loggedDentistId)
         .then(res => res.json())
         .then(data => {
             lastFetchedAppointments = data || [];
+            assignLocalAppointmentNumbers(lastFetchedAppointments);
+            // Keep the working list in chronological order (earliest date & time first)
+            // so both the Today's Schedule and All Appointments tables auto-sort by date/time.
+            lastFetchedAppointments = sortAppointmentsByDateTime(lastFetchedAppointments);
             updateTodayNotification(lastFetchedAppointments);
             renderTodayAppointments(lastFetchedAppointments);
 
@@ -168,25 +205,27 @@ function loadDentistAppointments(onDone) {
             if (allInput) allInput.value = '';
             var todayInput = document.getElementById('todaySearchInput');
             if (todayInput) todayInput.value = '';
+            currentStatusFilter = 'ALL';
+            updateStatusFilterUI();
 
             if (tbody) {
                 if (!lastFetchedAppointments || lastFetchedAppointments.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#9aa0ab; padding:24px;">No appointments found.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#9aa0ab; padding:24px;">No appointments found.</td></tr>';
                 } else {
-                    tbody.innerHTML = buildAppointmentRowsHTML(lastFetchedAppointments);
+                    tbody.innerHTML = buildAppointmentRowsHTML(lastFetchedAppointments, false);
                 }
             }
             if (typeof onDone === 'function') onDone();
         })
         .catch(() => {
-            if (tbody) tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#d33; padding:24px;">Failed to load appointments.</td></tr>';
+            if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#d33; padding:24px;">Failed to load appointments.</td></tr>';
             if (typeof onDone === 'function') onDone();
         });
 }
 
 function filterAppointmentsTable(scope) {
     var term = '';
-    var tbody, sourceList;
+    var tbody, sourceList, colspan, includeApptNo;
 
     if (scope === 'today') {
         var todayEl = document.getElementById('todaySearchInput');
@@ -194,39 +233,86 @@ function filterAppointmentsTable(scope) {
         tbody = document.getElementById('todayAppointmentsTableBody');
         var todayStr = getTodayStr();
         sourceList = (lastFetchedAppointments || []).filter(a => (a.appointmentDate || a.appointment_date || '') === todayStr);
+        colspan = 8;
+        includeApptNo = true;
     } else {
         var allEl = document.getElementById('allSearchInput');
         term = (allEl ? allEl.value : '').trim().toLowerCase();
         tbody = document.getElementById('dentistAppointmentsTableBody');
         sourceList = lastFetchedAppointments || [];
+        if (currentStatusFilter && currentStatusFilter !== 'ALL') {
+            sourceList = sourceList.filter(a => (a.status || 'PENDING').toUpperCase() === currentStatusFilter);
+        }
+        colspan = 7;
+        includeApptNo = false;
     }
 
     if (!tbody) return;
 
     var filtered = !term ? sourceList : sourceList.filter(a => {
         var aptNo = (a.appointmentNo || '').toLowerCase();
+        var localAptNo = (a.localAptNo || '').toLowerCase();
         var name = (a.patientName || '').toLowerCase();
-        return aptNo.includes(term) || name.includes(term);
+        return aptNo.includes(term) || localAptNo.includes(term) || name.includes(term);
     });
 
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#9aa0ab; padding:24px;">No matching appointments found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="' + colspan + '" style="text-align:center; color:#9aa0ab; padding:24px;">No matching appointments found.</td></tr>';
         return;
     }
-    tbody.innerHTML = buildAppointmentRowsHTML(filtered);
+    tbody.innerHTML = buildAppointmentRowsHTML(filtered, includeApptNo);
 }
 
-function buildAppointmentRowsHTML(list) {
+// Toggles the status filter dropdown for the All Appointments table.
+function toggleFilterDropdown() {
+    var dropdown = document.getElementById('statusFilterDropdown');
+    if (!dropdown) return;
+    dropdown.classList.toggle('show');
+}
+
+// Applies a status filter (ALL / PENDING / COMPLETED / CANCELLED) to the All Appointments table.
+function setStatusFilter(status) {
+    currentStatusFilter = status;
+    updateStatusFilterUI();
+    var dropdown = document.getElementById('statusFilterDropdown');
+    if (dropdown) dropdown.classList.remove('show');
+    filterAppointmentsTable('all');
+}
+
+function updateStatusFilterUI() {
+    var label = document.getElementById('statusFilterLabel');
+    var labels = { ALL: 'Filter', PENDING: 'Pending', COMPLETED: 'Completed', CANCELLED: 'Cancelled' };
+    if (label) label.textContent = labels[currentStatusFilter] || 'Filter';
+
+    var options = document.querySelectorAll('#statusFilterDropdown .filter-option');
+    options.forEach(function (opt) {
+        opt.classList.toggle('active', opt.getAttribute('data-status') === currentStatusFilter);
+    });
+}
+
+// Closes the status filter dropdown when clicking anywhere outside of it.
+document.addEventListener('click', function (e) {
+    var wrap = document.querySelector('.filter-wrap');
+    var dropdown = document.getElementById('statusFilterDropdown');
+    if (!wrap || !dropdown) return;
+    if (!wrap.contains(e.target)) {
+        dropdown.classList.remove('show');
+    }
+});
+
+function buildAppointmentRowsHTML(list, includeApptNo) {
+    if (includeApptNo === undefined) includeApptNo = true;
     var rowsHTML = '';
     (list || []).forEach(a => {
-        var aptNo = a.appointmentNo || '-';
+        var realAptNo = a.appointmentNo || '-';
+        var displayAptNo = a.localAptNo || realAptNo;
         var status = a.status || 'PENDING';
         var actionButtons = (status === 'PENDING') ?
-            `<button class="btn-action btn-complete" onclick="updateAppointmentStatus('${aptNo}', 'COMPLETED')">Complete</button>
-             <button class="btn-action btn-cancel" onclick="updateAppointmentStatus('${aptNo}', 'CANCELLED')">Cancel</button>` : '-';
+            `<button class="btn-action btn-complete" onclick="updateAppointmentStatus('${realAptNo}', 'COMPLETED')">Complete</button>
+             <button class="btn-action btn-cancel" onclick="updateAppointmentStatus('${realAptNo}', 'CANCELLED')">Cancel</button>` : '-';
 
         rowsHTML += `<tr>
-            <td><b>${aptNo}</b></td>
+            ${includeApptNo ? `<td><b>${displayAptNo}</b></td>` : ''}
             <td class="align-left">${escapeHtml(a.patientName || '-')}</td>
             <td>${escapeHtml(a.contactNo || '-')}</td>
             <td class="align-left">${escapeHtml(a.treatmentName || '-')}</td>
@@ -616,10 +702,19 @@ function searchAppointment() {
     if (msg) msg.style.display = 'none';
     if (!aptNo) return;
 
-    fetch(BASE_URL + '/appointment/' + encodeURIComponent(aptNo))
+    // The dentist searches using their own local appointment number (e.g. APT0001).
+    // Resolve it to the real, clinic-wide appointment number the backend expects.
+    var matched = (lastFetchedAppointments || []).find(a =>
+        (a.localAptNo || '').toLowerCase() === aptNo.toLowerCase() ||
+        (a.appointmentNo || '').toLowerCase() === aptNo.toLowerCase()
+    );
+    var lookupNo = matched ? matched.appointmentNo : aptNo;
+
+    fetch(BASE_URL + '/appointment/' + encodeURIComponent(lookupNo))
         .then(res => res.status === 200 ? res.json() : Promise.reject('No appointment found with number ' + aptNo))
         .then(a => {
-            document.getElementById('d-apptNo').textContent = a.appointmentNo || '-';
+            var displayNo = (matched && matched.localAptNo) || a.appointmentNo || '-';
+            document.getElementById('d-apptNo').textContent = displayNo;
             document.getElementById('d-patientName').textContent = a.patientName || '-';
             document.getElementById('d-contact').textContent = a.contactNo || '-';
             document.getElementById('d-address').textContent = a.address || '-';

@@ -3,41 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <title>Sunrise Dental Clinic - Login</title>
-
     <link rel="stylesheet" href="Assets/Css/login.css">
-    <script src="Assets/JS/index.js"></script>
-    <style>
-        
-    </style>
+    <script src="Assets/JS/index.js" defer></script>
 </head>
 <body>
 
-    <div class="login-box">
-        <h2>Sunrise Dental Clinic</h2>
-        <p class="subtitle">Appointment & Patient Management System</p>
+    <div class="bg-anim">
+        <span class="blob b1"></span>
+        <span class="blob b2"></span>
+        <span class="blob b3"></span>
+    </div>
 
-        <div class="error-msg" id="error-msg">Invalid username or password!</div>
+    <div class="center-wrap">
+        <div class="login-box">
 
-        <form id="login-form">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" placeholder="Enter your username" required>
+            <div class="logo-badge">
+                <svg width="34" height="34" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 40 A30 30 0 0 1 80 40" stroke="#0d2b47" stroke-width="6" fill="none" stroke-linecap="round"/>
+                    <path d="M50 46 C34 46 32 58 35 74 C37 85 42 89 46 80 C48 76 52 76 54 80 C58 89 63 85 65 74 C68 58 66 46 50 46 Z"
+                          fill="none" stroke="#0d2b47" stroke-width="6" stroke-linejoin="round"/>
+                </svg>
+            </div>
 
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="Enter your password" required>
-            
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            <h2>Sunrise Dental Clinic</h2>
+            <p class="subtitle">Sign in to manage appointments &amp; patients</p>
 
-            <button type="submit" id="login-btn">Login</button>
-        </form>
+            <div class="error-msg" id="error-msg">Invalid username or password!</div>
 
-        <div class="hint">
-            Staff and Dentist accounts all log in here.<br>
-            You will be redirected to your own dashboard automatically.
+            <form id="login-form">
+                <div class="input-wrap">
+                    <span class="input-icon">
+                        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </span>
+                    <input type="text" id="username" name="username" placeholder="Username" required>
+                </div>
+
+                <div class="input-wrap">
+                    <span class="input-icon">
+                        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="4" y="11" width="16" height="10" rx="2"/>
+                            <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+                        </svg>
+                    </span>
+                    <input type="password" id="password" name="password" placeholder="Password" required>
+                    <span class="toggle-eye" id="toggle-eye">
+                        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </span>
+                </div>
+
+                <div class="row-between">
+                    <label class="remember">
+                        <input type="checkbox" id="remember-me"> Remember me
+                    </label>
+                    <a href="#" class="forgot-link" id="forgot-link">Forgot Password?</a>
+                </div>
+
+                <button type="submit" id="login-btn">
+                    <span>Sign In</span>
+                </button>
+            </form>
+
+            <div class="hint">
+                Staff and Dentist accounts log in here.<br>
+                You'll be redirected to your own dashboard automatically.
+            </div>
         </div>
     </div>
 
-    <script>
-    </script>
 </body>
 </html>

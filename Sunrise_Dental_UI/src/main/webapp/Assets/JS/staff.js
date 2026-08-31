@@ -1,4 +1,4 @@
-    const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
+const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
 
     var currentStaffUsername = "";
     var currentUserRole = "STAFF";
