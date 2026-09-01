@@ -35,8 +35,9 @@ public class DentistResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response addDentist(Dentist dentist) {
-        boolean success = dentistDAO.addDentist(dentist);
-        if (success) {
+        int newId = dentistDAO.addDentist(dentist);
+        if (newId != -1) {
+            dentist.setDentistId(newId);
             return Response.status(Response.Status.CREATED)
                     .entity(dentist)
                     .type(MediaType.APPLICATION_JSON)

@@ -8,16 +8,8 @@ var lastFetchedAppointments = [];
 var lastReportDayList = [];
 var lastReportDate = '';
 var lastReportStats = null;
-
-// Assigns each dentist their own sequential appointment numbers (APT0001, APT0002, ...)
-// based on creation order, independent of the clinic-wide appointment number used in the backend.
-// The real backend appointmentNo (a.appointmentNo) is kept for all API calls (status update, search),
-// while a.localAptNo is only used for display.
-// Filter state for the All Appointments table's status filter dropdown
 var currentStatusFilter = 'ALL';
 
-// Sorts a list of appointments chronologically: earliest date first, and
-// within the same date, earliest time first.
 function sortAppointmentsByDateTime(list) {
     return (list || []).slice().sort((a, b) => {
         var aDate = a.appointmentDate || a.appointment_date || '';
@@ -90,7 +82,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-// Sidebar Navigation සකස් කිරීම
 function setupNavigation() {
     var navs = document.querySelectorAll('.nav-item');
     navs.forEach(function(n) {
@@ -121,8 +112,7 @@ function showSection(targetId) {
         navBtn.classList.add('active');
     }
 
-    // Section එක අනුව අදාළ Data Fetch කිරීම
-    if (targetId === 'sec-appointments' || targetId === 'sec-today') {
+    if (targetId === 'sec-overview' || targetId === 'sec-appointments' || targetId === 'sec-today') {
         loadDentistAppointments();
     }
     if (targetId === 'sec-profile') {
@@ -195,11 +185,11 @@ function loadDentistAppointments(onDone) {
         .then(data => {
             lastFetchedAppointments = data || [];
             assignLocalAppointmentNumbers(lastFetchedAppointments);
-            // Keep the working list in chronological order (earliest date & time first)
-            // so both the Today's Schedule and All Appointments tables auto-sort by date/time.
+
             lastFetchedAppointments = sortAppointmentsByDateTime(lastFetchedAppointments);
             updateTodayNotification(lastFetchedAppointments);
             renderTodayAppointments(lastFetchedAppointments);
+            renderOverviewCards(lastFetchedAppointments);
 
             var allInput = document.getElementById('allSearchInput');
             if (allInput) allInput.value = '';
@@ -263,14 +253,12 @@ function filterAppointmentsTable(scope) {
     tbody.innerHTML = buildAppointmentRowsHTML(filtered, includeApptNo);
 }
 
-// Toggles the status filter dropdown for the All Appointments table.
 function toggleFilterDropdown() {
     var dropdown = document.getElementById('statusFilterDropdown');
     if (!dropdown) return;
     dropdown.classList.toggle('show');
 }
 
-// Applies a status filter (ALL / PENDING / COMPLETED / CANCELLED) to the All Appointments table.
 function setStatusFilter(status) {
     currentStatusFilter = status;
     updateStatusFilterUI();
@@ -290,7 +278,6 @@ function updateStatusFilterUI() {
     });
 }
 
-// Closes the status filter dropdown when clicking anywhere outside of it.
 document.addEventListener('click', function (e) {
     var wrap = document.querySelector('.filter-wrap');
     var dropdown = document.getElementById('statusFilterDropdown');
@@ -323,6 +310,21 @@ function buildAppointmentRowsHTML(list, includeApptNo) {
         </tr>`;
     });
     return rowsHTML;
+}
+
+function renderOverviewCards(list) {
+    var total = document.getElementById('ov-total');
+    var pending = document.getElementById('ov-pending');
+    var completed = document.getElementById('ov-completed');
+    if (!total || !pending || !completed) return;
+
+    var data = list || [];
+    var pendingCount = data.filter(a => (a.status || 'PENDING').toUpperCase() === 'PENDING').length;
+    var completedCount = data.filter(a => (a.status || '').toUpperCase() === 'COMPLETED').length;
+
+    total.textContent = data.length;
+    pending.textContent = pendingCount;
+    completed.textContent = completedCount;
 }
 
 function renderTodayAppointments(data) {
@@ -702,8 +704,6 @@ function searchAppointment() {
     if (msg) msg.style.display = 'none';
     if (!aptNo) return;
 
-    // The dentist searches using their own local appointment number (e.g. APT0001).
-    // Resolve it to the real, clinic-wide appointment number the backend expects.
     var matched = (lastFetchedAppointments || []).find(a =>
         (a.localAptNo || '').toLowerCase() === aptNo.toLowerCase() ||
         (a.appointmentNo || '').toLowerCase() === aptNo.toLowerCase()
@@ -722,6 +722,7 @@ function searchAppointment() {
             document.getElementById('d-treatment').textContent = a.treatmentName || '-';
             document.getElementById('d-date').textContent = a.appointmentDate || '-';
             document.getElementById('d-time').textContent = a.appointmentTime || '-';
+            
             var statusBadge = document.getElementById('d-statusBadge');
             if (statusBadge) {
                 statusBadge.textContent = a.status || 'PENDING';

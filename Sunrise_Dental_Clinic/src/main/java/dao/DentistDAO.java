@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class DentistDAO {
 
@@ -37,11 +38,15 @@ public class DentistDAO {
         return null;
     }
 
-    public boolean addDentist(Dentist d) {
+    // Returns the DB-generated dentist_id on success, or -1 on failure.
+    // Uses RETURN_GENERATED_KEYS the same way PatientDAO/TreatmentDAO/StaffDAO
+    // do, so the caller (DentistResource) can set the real ID on the response
+    // instead of sending back whatever was in the incoming request body.
+    public int addDentist(Dentist d) {
         String sql = "INSERT INTO dentists (dentist_name, username, password, specialization, contact_no, consultation_fee) VALUES (?, ?, ?, ?, ?, ?)";
         Connection conn = DBConnection.getInstance().getConnection();
 
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, d.getDentistName());
             ps.setString(2, d.getUsername());
             ps.setString(3, d.getPassword());
@@ -49,12 +54,19 @@ public class DentistDAO {
             ps.setString(5, d.getContactNo());
             ps.setDouble(6, d.getConsultationFee());
 
-            return ps.executeUpdate() > 0;
+            int rows = ps.executeUpdate();
+            if (rows > 0) {
+                try (ResultSet keys = ps.getGeneratedKeys()) {
+                    if (keys.next()) {
+                        return keys.getInt(1);
+                    }
+                }
+            }
         } catch (SQLException e) {
             System.err.println("Error in addDentist: " + e.getMessage());
             e.printStackTrace();
-            return false;
         }
+        return -1;
     }
 
     public boolean updateDentist(Dentist d) {
