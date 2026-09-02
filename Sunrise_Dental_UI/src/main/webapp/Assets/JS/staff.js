@@ -10,7 +10,6 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
     var cachedStaff = [];
     var cachedBillableAppointments = [];
 
-    // --- Helper function to format 24hr time (HH:mm:ss) to 12hr time with AM/PM ---
     function formatTimeTo12Hour(timeString) {
         if (!timeString) return '-';
         var parts = timeString.toString().split(':');
@@ -21,7 +20,7 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
         var ampm = hours >= 12 ? 'PM' : 'AM';
         
         hours = hours % 12;
-        hours = hours ? hours : 12; // 0 පැය 12 AM ලෙස පෙන්වීමට
+        hours = hours ? hours : 12;
         var formattedHours = hours < 10 ? '0' + hours : hours;
         
         return formattedHours + ':' + minutes + ' ' + ampm;
@@ -30,7 +29,6 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
     document.addEventListener("DOMContentLoaded", function () {
         loadCurrentUserFromUrl();
         loadDropdowns();
-        populateApptTimeDatalist();
 
         var navItems = document.querySelectorAll('.nav-item[data-target]');
         navItems.forEach(item => {
@@ -122,6 +120,8 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
 
         if (currentUserRole.toUpperCase() === 'ADMIN') {
             document.getElementById('addStaffBtn').style.display = 'block';
+            document.getElementById('addDentistBtn').style.display = 'block';
+            document.getElementById('addTreatmentBtn').style.display = 'block';
         }
 
         window.history.replaceState({}, document.title, window.location.pathname);
@@ -194,9 +194,11 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
                 resetAppointmentTimeUI();
                 document.getElementById('editAppointmentNo').value = '';
                 resetAppointmentFormLabels();
+                hideExistingPatientTag();
             }
             isEditingAppointment = false;
             loadDropdowns();
+            if (!cachedPatients || cachedPatients.length === 0) loadPatientsForAutocomplete();
         } else if (targetId === 'sec-dentists') {
             loadDentistsTable();
         } else if (targetId === 'sec-treatments') {
@@ -225,37 +227,46 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
         var totalEl = document.getElementById('ov-total');
         var pendingEl = document.getElementById('ov-pending');
         var completedEl = document.getElementById('ov-completed');
+        var cancelledEl = document.getElementById('ov-cancelled');
+        var dentistsEl = document.getElementById('ov-dentists');
+        var treatmentsEl = document.getElementById('ov-treatments');
+        var patientsEl = document.getElementById('ov-patients');
+        var staffEl = document.getElementById('ov-staff');
         if (!totalEl) return;
 
         var appts = cachedAppointments || [];
         var pendingCount = appts.filter(a => (a.status || 'PENDING').toUpperCase() === 'PENDING').length;
         var completedCount = appts.filter(a => (a.status || '').toUpperCase() === 'COMPLETED').length;
+        var cancelledCount = appts.filter(a => (a.status || '').toUpperCase() === 'CANCELLED').length;
 
         totalEl.textContent = appts.length;
         if (pendingEl) pendingEl.textContent = pendingCount;
         if (completedEl) completedEl.textContent = completedCount;
+        if (cancelledEl) cancelledEl.textContent = cancelledCount;
+        if (dentistsEl) dentistsEl.textContent = (cachedDentists || []).length;
+        if (treatmentsEl) treatmentsEl.textContent = (cachedTreatments || []).length;
+        if (patientsEl) patientsEl.textContent = (cachedPatients || []).length;
+        if (staffEl) staffEl.textContent = (cachedStaff || []).length;
     }
 
     /**
-     * Loads Overview by fetching the latest appointments and rendering
-     * the 3 real-time stat cards.
+     * Loads Overview by fetching appointments, dentists, treatments,
+     * patients and staff in parallel and rendering all 8 real-time
+     * stat cards as each dataset arrives.
      */
     function loadOverview() {
         loadAppointments();
+        loadDentistsTable();
+        loadTreatmentsTable();
+        loadPatientsTable();
+        loadStaffTable();
     }
 
-    /**
-     * ------------------------------------------------------------------
-     * REPORTS
-     * Generates a Daily or Monthly appointment summary from the appointment
-     * data already available on this dashboard (same REST endpoint used by
-     * Overview/Appointments), filtered by the date/month the staff member
-     * picks. "Download PDF" reuses window.print() with a dedicated print
-     * stylesheet - the same pattern already used for the Bill receipt -
-     * so the browser's own "Save as PDF" option produces the PDF file.
-     * ------------------------------------------------------------------
-     */
     var currentReportType = 'daily';
+    var lastReportList = [];
+    var lastReportStats = null;
+    var lastReportPeriodValue = '';
+    var lastReportPeriodLabel = '';
 
     function setReportType(type) {
         currentReportType = type;
@@ -311,6 +322,9 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
             });
 
             renderReport(filtered, dentists || [], treatments || []);
+            lastReportList = filtered;
+            lastReportPeriodValue = periodValue;
+            updatePrintLetterhead(periodValue);
             output.style.display = 'block';
             downloadBtn.style.display = 'inline-flex';
         })
@@ -322,13 +336,223 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
     }
     window.generateReport = generateReport;
 
+    function updatePrintLetterhead(periodValue) {
+        var titleEl = document.getElementById('printReportTitle');
+        var periodEl = document.getElementById('printReportPeriod');
+        var generatedEl = document.getElementById('printGeneratedDate');
+        if (titleEl) titleEl.textContent = currentReportType === 'daily' ? 'Daily Report' : 'Monthly Report';
+        if (periodEl) periodEl.textContent = formatReportPeriodLabel(currentReportType, periodValue);
+        if (generatedEl) generatedEl.textContent = new Date().toLocaleString('en-GB', {
+            day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+    }
+
+    function formatReportPeriodLabel(type, value) {
+        if (!value) return '—';
+        if (type === 'daily') {
+            var d = new Date(value + 'T00:00:00');
+            if (isNaN(d.getTime())) return value;
+            return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+        }
+        var parts = value.split('-'); // "yyyy-MM"
+        if (parts.length !== 2) return value;
+        var monthDate = new Date(Number(parts[0]), Number(parts[1]) - 1, 1);
+        if (isNaN(monthDate.getTime())) return value;
+        return monthDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+    }
+
+    function generateReportPDF() {
+        var msg = document.getElementById('reportResultMsg');
+        if (!lastReportPeriodValue || !lastReportStats) {
+            if (msg) {
+                msg.className = 'error'; msg.style.display = 'block';
+                msg.textContent = 'Please click Generate first to build a report before downloading.';
+                setTimeout(() => { msg.style.display = 'none'; }, 4000);
+            }
+            return;
+        }
+        if (!window.jspdf) {
+            if (msg) {
+                msg.className = 'error'; msg.style.display = 'block';
+                msg.textContent = 'PDF library failed to load. Check your internet connection and try again.';
+                setTimeout(() => { msg.style.display = 'none'; }, 4000);
+            }
+            return;
+        }
+
+        var jsPDF = window.jspdf.jsPDF;
+        var doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
+        var pageWidth = doc.internal.pageSize.getWidth();
+        var margin = 40;
+        var contentWidth = pageWidth - margin * 2;
+        var reportTypeLabel = currentReportType === 'daily' ? 'Daily Report' : 'Monthly Report';
+        var periodLabel = formatReportPeriodLabel(currentReportType, lastReportPeriodValue);
+
+        var headerHeight = 96;
+        doc.setFillColor(37, 99, 227);
+        doc.rect(0, 0, pageWidth, headerHeight, 'F');
+        doc.setFillColor(29, 84, 199);
+        doc.rect(0, 0, pageWidth, 4, 'F');
+
+        var badgeSize = 38;
+        var badgeX = margin;
+        var badgeY = (headerHeight - badgeSize) / 2 - 4;
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(badgeX, badgeY, badgeSize, badgeSize, 10, 10, 'F');
+        doc.setTextColor(37, 99, 227);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(18);
+        doc.text('S', badgeX + badgeSize / 2, badgeY + badgeSize / 2 + 6.5, { align: 'center' });
+
+        var textX = badgeX + badgeSize + 14;
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(19);
+        doc.text('Sunrise Dental Clinic', textX, badgeY + 17);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10.5);
+        doc.setTextColor(219, 234, 254);
+        doc.text('Professional Dental Care', textX, badgeY + 33);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        var pillLabel = reportTypeLabel.toUpperCase();
+        var pillPaddingX = 10;
+        var pillWidth = doc.getTextWidth(pillLabel) + pillPaddingX * 2;
+        var pillHeight = 18;
+        var pillX = pageWidth - margin - pillWidth;
+        var pillY = badgeY + 1;
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(pillX, pillY, pillWidth, pillHeight, 9, 9, 'F');
+        doc.setTextColor(37, 99, 227);
+        doc.text(pillLabel, pillX + pillWidth / 2, pillY + 12.5, { align: 'center' });
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(11.5);
+        doc.setTextColor(255, 255, 255);
+        doc.text(String(periodLabel), pageWidth - margin, pillY + pillHeight + 16, { align: 'right' });
+
+        var metaTop = headerHeight + 18;
+        var metaHeight = 44;
+        doc.setFillColor(247, 250, 255);
+        doc.setDrawColor(230, 236, 250);
+        doc.roundedRect(margin, metaTop, contentWidth, metaHeight, 8, 8, 'FD');
+
+        var metaMidX = margin + contentWidth / 2;
+        doc.setDrawColor(224, 230, 245);
+        doc.line(metaMidX, metaTop + 10, metaMidX, metaTop + metaHeight - 10);
+
+        var metaLabelY = metaTop + 18;
+        var metaValueY = metaTop + 32;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(148, 158, 179);
+        doc.text('GENERATED BY', margin + 18, metaLabelY);
+        doc.text('GENERATED ON', metaMidX + 18, metaLabelY);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(31, 36, 48);
+        doc.text(String(currentStaffUsername || '-'), margin + 18, metaValueY);
+        doc.text(new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }), metaMidX + 18, metaValueY);
+
+        var stats = lastReportStats;
+        var summaryData = [
+            { label: 'Total', value: String(stats.total), accent: [37, 99, 227] },
+            { label: 'Completed', value: String(stats.completed), accent: [30, 158, 76] },
+            { label: 'Pending', value: String(stats.pending), accent: [217, 143, 15] },
+            { label: 'Cancelled', value: String(stats.cancelled), accent: [221, 51, 51] },
+            { label: 'Est. Earnings', value: 'LKR ' + stats.earnings.toFixed(2), accent: [30, 158, 76] }
+        ];
+        var boxTop = metaTop + metaHeight + 20;
+        var boxGap = 10;
+        var boxWidth = (contentWidth - boxGap * 4) / 5;
+        var boxHeight = 58;
+        summaryData.forEach(function (item, i) {
+            var x = margin + i * (boxWidth + boxGap);
+            var isEarnings = item.label === 'Est. Earnings';
+            doc.setFillColor(255, 255, 255);
+            doc.setDrawColor(232, 236, 245);
+            doc.roundedRect(x, boxTop, boxWidth, boxHeight, 7, 7, 'FD');
+            doc.setFillColor(item.accent[0], item.accent[1], item.accent[2]);
+            doc.roundedRect(x, boxTop, boxWidth, 4, 2, 2, 'F');
+            doc.rect(x, boxTop + 2, boxWidth, 2, 'F');
+
+            doc.setTextColor(item.accent[0], item.accent[1], item.accent[2]);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(isEarnings ? 12.5 : 16);
+            doc.text(item.value, x + boxWidth / 2, boxTop + 32, { align: 'center' });
+            doc.setTextColor(140, 148, 165);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(7.8);
+            doc.text(item.label.toUpperCase(), x + boxWidth / 2, boxTop + 46, { align: 'center' });
+        });
+
+        var tableRows = (lastReportList || []).map(function (a) {
+            var rawDentist = a.dentistName || a.dentist_name || '';
+            var dentistLabel = rawDentist ? (rawDentist.startsWith('Dr.') ? rawDentist : 'Dr. ' + rawDentist) : '-';
+            return [
+                a.appointmentNo || a.appointment_no || '-',
+                a.patientName || a.patient_name || '-',
+                dentistLabel,
+                a.treatmentName || a.treatment_name || '-',
+                formatTimeTo12Hour(a.appointmentTime || a.appointment_time || ''),
+                (a.status || 'PENDING').toUpperCase()
+            ];
+        });
+
+        doc.autoTable({
+            head: [['Appt No', 'Patient Name', 'Dentist', 'Treatment', 'Time', 'Status']],
+            body: tableRows.length ? tableRows : [['-', 'No appointments found for this period', '-', '-', '-', '-']],
+            startY: boxTop + boxHeight + 26,
+            margin: { left: margin, right: margin },
+            styles: { font: 'helvetica', fontSize: 9, cellPadding: { top: 9, bottom: 9, left: 8, right: 8 }, textColor: [31, 36, 48], lineColor: [238, 240, 244], lineWidth: 0.5, valign: 'middle' },
+            headStyles: { fillColor: [37, 99, 227], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9, halign: 'center', cellPadding: { top: 10, bottom: 10, left: 8, right: 8 } },
+            alternateRowStyles: { fillColor: [249, 251, 255] },
+            columnStyles: {
+                0: { halign: 'center', cellWidth: 62, fontStyle: 'bold' },
+                1: { halign: 'left', cellWidth: 118 },
+                2: { halign: 'left', cellWidth: 100 },
+                3: { halign: 'left' },
+                4: { halign: 'center', cellWidth: 55 },
+                5: { halign: 'center', cellWidth: 78 }
+            },
+            didParseCell: function (data) {
+                if (data.section === 'body' && data.column.index === 5) {
+                    var status = String(data.cell.raw).toUpperCase();
+                    if (status === 'COMPLETED') { data.cell.styles.textColor = [30, 158, 76]; data.cell.styles.fontStyle = 'bold'; }
+                    else if (status === 'CANCELLED') { data.cell.styles.textColor = [221, 51, 51]; data.cell.styles.fontStyle = 'bold'; }
+                    else { data.cell.styles.textColor = [217, 143, 15]; data.cell.styles.fontStyle = 'bold'; }
+                }
+            },
+            didDrawPage: function () {
+                var pageCount = doc.internal.getNumberOfPages();
+                var footerY = doc.internal.pageSize.getHeight() - 26;
+                doc.setDrawColor(238, 240, 244);
+                doc.line(margin, footerY - 10, pageWidth - margin, footerY - 10);
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(8);
+                doc.setTextColor(154, 160, 171);
+                doc.text('Sunrise Dental Clinic — Confidential · Generated electronically', margin, footerY);
+                doc.text(
+                    'Page ' + doc.internal.getCurrentPageInfo().pageNumber + ' of ' + pageCount,
+                    pageWidth - margin,
+                    footerY,
+                    { align: 'right' }
+                );
+            }
+        });
+
+        var filenameSafePeriod = lastReportPeriodValue.replace(/[^0-9a-zA-Z-]/g, '');
+        doc.save((currentReportType === 'daily' ? 'DailyReport_' : 'MonthlyReport_') + filenameSafePeriod + '.pdf');
+    }
+    window.generateReportPDF = generateReportPDF;
+
     function renderReport(list, dentists, treatments) {
         var completed = list.filter(a => (a.status || '').toUpperCase() === 'COMPLETED').length;
         var pending = list.filter(a => (a.status || 'PENDING').toUpperCase() === 'PENDING').length;
         var cancelled = list.filter(a => (a.status || '').toUpperCase() === 'CANCELLED').length;
 
-        // Estimated earnings = (treatment cost + dentist consultation fee) summed
-        // across COMPLETED appointments in the selected period.
         var earnings = 0;
         list.forEach(a => {
             if ((a.status || '').toUpperCase() !== 'COMPLETED') return;
@@ -346,6 +570,8 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
         document.getElementById('rep-pending').textContent = pending;
         document.getElementById('rep-cancelled').textContent = cancelled;
         document.getElementById('rep-earnings').textContent = 'LKR ' + earnings.toFixed(2);
+
+        lastReportStats = { total: list.length, completed: completed, pending: pending, cancelled: cancelled, earnings: earnings };
 
         var tbody = document.getElementById('reportTableBody');
         if (list.length === 0) {
@@ -387,7 +613,7 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
             var rawTime = a.appointmentTime || a.appointment_time || '';
             var formattedTime = formatTimeTo12Hour(rawTime);
 
-            var actionButtons = `<button class="btn-action btn-edit" onclick="editAppointment('${aptNo}')">Edit</button>`
+            var actionButtons = (status === 'PENDING' ? `<button class="btn-action btn-edit" onclick="editAppointment('${aptNo}')">Edit</button>` : '')
                 + (isAdmin ? `<button class="btn-action btn-delete" onclick="deleteAppointment('${aptNo}')">Delete</button>` : '');
 
             rowsHTML += `<tr>
@@ -460,8 +686,6 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
                 filterSearchTable();
             });
     }
-
-    /* --- DENTISTS MANAGEMENT SCRIPTS --- */
 
     function fetchDentistsData() {
         return fetch(BASE_URL + '/dentists')
@@ -552,12 +776,14 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
         document.getElementById('dentistsTableCard').style.display = 'none';
         document.getElementById('dentistFormCard').style.display = 'block';
         document.getElementById('dentistResultMsg').style.display = 'none';
+        resetPasswordVisibility('dPassword', 'dPassword-toggle');
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 
     function closeDentistModal() {
         document.getElementById('dentistFormCard').style.display = 'none';
         document.getElementById('dentistsTableCard').style.display = 'block';
+        resetPasswordVisibility('dPassword', 'dPassword-toggle');
     }
 
     function editDentist(id) {
@@ -580,6 +806,7 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
         document.getElementById('dentistsTableCard').style.display = 'none';
         document.getElementById('dentistFormCard').style.display = 'block';
         document.getElementById('dentistResultMsg').style.display = 'none';
+        resetPasswordVisibility('dPassword', 'dPassword-toggle');
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 
@@ -636,8 +863,6 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
             .catch(err => console.error("Error deleting dentist:", err));
     }
 
-    /* --- TREATMENTS MANAGEMENT SCRIPTS --- */
-
     function loadTreatmentsTable() {
         var tbody = document.getElementById('treatmentsTableBody');
         if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:24px; color:#9aa0ab;">Loading treatments...</td></tr>';
@@ -647,6 +872,7 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
             .then(data => {
                 cachedTreatments = data || [];
                 renderTreatmentsTableData(cachedTreatments);
+                renderOverviewCards();
             })
             .catch(err => {
                 console.error("Error fetching treatments:", err);
@@ -783,9 +1009,7 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
             })
             .catch(err => console.error("Error deleting treatment:", err));
     }
-
-    /* --- PATIENTS MANAGEMENT SCRIPTS --- */
-
+    
     function loadPatientsTable() {
         var tbody = document.getElementById('patientsTableBody');
         if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:24px; color:#9aa0ab;">Loading patients...</td></tr>';
@@ -996,12 +1220,14 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
         document.getElementById('staffTableCard').style.display = 'none';
         document.getElementById('staffFormCard').style.display = 'block';
         document.getElementById('staffResultMsg').style.display = 'none';
+        resetPasswordVisibility('stPassword', 'stPassword-toggle');
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 
     function closeStaffModal() {
         document.getElementById('staffFormCard').style.display = 'none';
         document.getElementById('staffTableCard').style.display = 'block';
+        resetPasswordVisibility('stPassword', 'stPassword-toggle');
     }
 
     function editStaff(id) {
@@ -1020,6 +1246,7 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
         document.getElementById('staffTableCard').style.display = 'none';
         document.getElementById('staffFormCard').style.display = 'block';
         document.getElementById('staffResultMsg').style.display = 'none';
+        resetPasswordVisibility('stPassword', 'stPassword-toggle');
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 
@@ -1077,8 +1304,6 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
         })
         .catch(err => console.error("Error deleting staff:", err));
     }
-
-    /* --- PROFILE SETTINGS (for the currently logged-in staff member) --- */
 
     function loadStaffProfileIntoForm() {
         var msg = document.getElementById('profileResultMsg');
@@ -1139,9 +1364,18 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
         });
     }
 
-    function toggleStaffPasswordVisibility() {
-        var input = document.getElementById('pf-password');
-        var btn = document.getElementById('pf-password-toggle');
+    function resetPasswordVisibility(inputId, btnId) {
+        var input = document.getElementById(inputId);
+        var btn = document.getElementById(btnId);
+        if (input) input.type = 'password';
+        if (btn) btn.textContent = 'Show';
+    }
+
+    function toggleStaffPasswordVisibility(inputId, btnId) {
+        inputId = inputId || 'pf-password';
+        btnId = btnId || 'pf-password-toggle';
+        var input = document.getElementById(inputId);
+        var btn = document.getElementById(btnId);
         if (!input || !btn) return;
         if (input.type === 'password') {
             input.type = 'text';
@@ -1151,8 +1385,6 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
             btn.textContent = 'Show';
         }
     }
-
-    /* --- NOTICES (staff sends a notice to a single selected dentist) --- */
 
     function loadNoticeDentistDropdown() {
         var select = document.getElementById('noticeDentistId');
@@ -1215,16 +1447,18 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
         });
     }
 
-    /* --- APPOINTMENT EDIT & BILLING FUNCTIONS --- */
-
     function editAppointment(appointmentNo) {
         var apt = cachedAppointments.find(a => (a.appointmentNo || a.appointment_no) === appointmentNo);
         if (!apt) return;
+        var status = (apt.status || 'PENDING').toUpperCase();
+        if (status !== 'PENDING') return;
 
         document.getElementById('editAppointmentNo').value = appointmentNo;
         document.getElementById('patientName').value = apt.patientName || apt.patient_name || '';
         document.getElementById('address').value = apt.address || '';
         document.getElementById('contactNo').value = apt.contactNo || apt.contact_no || '';
+        hideSuggestionsBox();
+        hideExistingPatientTag();
         document.getElementById('appointmentDate').value = apt.appointmentDate || apt.appointment_date || '';
 
         var rawTime = apt.appointmentTime || apt.appointment_time || '';
@@ -1254,6 +1488,8 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
         resetAppointmentTimeUI();
         document.getElementById('editAppointmentNo').value = '';
         resetAppointmentFormLabels();
+        hideSuggestionsBox();
+        hideExistingPatientTag();
         showSection('sec-appointments');
     }
 
@@ -1277,100 +1513,44 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
             .catch(err => console.error("Error deleting appointment:", err));
     }
 
-    function populateApptTimeDatalist() {
-        var list = document.getElementById('apptTimeList');
-        if (!list) return;
-        list.innerHTML = '';
-        for (var totalMin = 8 * 60; totalMin <= 17 * 60; totalMin += 15) {
-            var h24 = Math.floor(totalMin / 60);
-            var m = totalMin % 60;
-            var opt = document.createElement('option');
-            opt.value = formatHHMMTo12(pad2(h24) + ':' + pad2(m));
-            list.appendChild(opt);
-        }
-    }
-
     function pad2(n) { return n < 10 ? '0' + n : '' + n; }
 
-    function formatHHMMTo12(hhmm) {
-        var parts = hhmm.split(':');
-        var h24 = parseInt(parts[0], 10);
-        var m = parts[1];
-        var period = h24 >= 12 ? 'PM' : 'AM';
-        var h12 = h24 % 12;
-        if (h12 === 0) h12 = 12;
-        return pad2(h12) + '.' + m + ' ' + period;
-    }
-
-    // Accepts either separator when typing: "8.00 AM", "8:00 AM", "08.30pm", "5 PM", "930am"
-    function parseTimeTo24H(input) {
-        if (!input) return null;
-        var cleaned = input.trim().toUpperCase().replace(/\s+/g, '');
-        var match = cleaned.match(/^(\d{1,2})[:.]?(\d{2})?(AM|PM)$/);
-        if (!match) return null;
-        var h = parseInt(match[1], 10);
-        var m = match[2] ? parseInt(match[2], 10) : 0;
-        var period = match[3];
-        if (h < 1 || h > 12 || m < 0 || m > 59) return null;
-        var h24 = h % 12;
-        if (period === 'PM') h24 += 12;
-        return pad2(h24) + ':' + pad2(m);
-    }
-
     function onApptTimeInput() {
-        // Clear hidden value while typing; it's finalized on blur/submit
-        var parsed = parseTimeTo24H(document.getElementById('appointmentTimeDisplay').value);
-        document.getElementById('appointmentTime').value = parsed || '';
+        document.getElementById('appointmentTime').style.borderColor = '';
     }
 
     function onApptTimeBlur() {
-        var display = document.getElementById('appointmentTimeDisplay');
-        var hidden = document.getElementById('appointmentTime');
-        var parsed = parseTimeTo24H(display.value);
-
-        if (!display.value.trim()) { hidden.value = ''; return; }
-
-        if (!parsed || parsed < '08:00' || parsed > '17:00') {
-            display.style.borderColor = '#d33';
-        } else {
-            display.style.borderColor = '';
-            display.value = formatHHMMTo12(parsed);
-            hidden.value = parsed;
-        }
+        var input = document.getElementById('appointmentTime');
+        var val = input.value;
+        if (!val) { input.style.borderColor = ''; return; }
+        input.style.borderColor = (val < '08:00' || val > '17:00') ? '#d33' : '';
     }
 
     function setAppointmentTimeUI(rawTime) {
         if (!rawTime) { resetAppointmentTimeUI(); return; }
         var parts = rawTime.split(':');
         var hhmm = pad2(parseInt(parts[0], 10)) + ':' + pad2(parseInt(parts[1] || '0', 10));
-        document.getElementById('appointmentTimeDisplay').value = formatHHMMTo12(hhmm);
-        document.getElementById('appointmentTimeDisplay').style.borderColor = '';
-        document.getElementById('appointmentTime').value = hhmm;
+        var input = document.getElementById('appointmentTime');
+        input.value = hhmm;
+        input.style.borderColor = '';
     }
 
     function resetAppointmentTimeUI() {
-        var display = document.getElementById('appointmentTimeDisplay');
-        display.value = '';
-        display.style.borderColor = '';
-        document.getElementById('appointmentTime').value = '';
+        var input = document.getElementById('appointmentTime');
+        input.value = '';
+        input.style.borderColor = '';
     }
 
     function registerAppointment() {
         var resultMsg = document.getElementById('resultMsg');
-        var displayEl = document.getElementById('appointmentTimeDisplay');
-        var rawTime = document.getElementById('appointmentTime').value;
-
-        // Fallback: re-parse the typed text in case blur never fired
-        if (!rawTime && displayEl.value.trim()) {
-            var reparsed = parseTimeTo24H(displayEl.value);
-            if (reparsed) rawTime = reparsed;
-        }
+        var timeInput = document.getElementById('appointmentTime');
+        var rawTime = timeInput.value;
 
         if (!rawTime) {
             resultMsg.className = 'error';
             resultMsg.style.display = 'block';
-            resultMsg.innerHTML = '⚠️ Please enter a valid appointment time (e.g. 08:30 AM).';
-            displayEl.style.borderColor = '#d33';
+            resultMsg.innerHTML = '⚠️ Please enter a valid appointment time (e.g: 08:30 AM).';
+            timeInput.style.borderColor = '#d33';
             return;
         }
 
@@ -1378,13 +1558,11 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
             resultMsg.className = 'error';
             resultMsg.style.display = 'block';
             resultMsg.innerHTML = '⚠️ Appointment time must be between 8.00 AM and 5.00 PM.';
-            displayEl.style.borderColor = '#d33';
+            timeInput.style.borderColor = '#d33';
             return;
         }
 
-        document.getElementById('appointmentTime').value = rawTime;
-        displayEl.value = formatHHMMTo12(rawTime);
-        displayEl.style.borderColor = '';
+        timeInput.style.borderColor = '';
 
         var formattedTime = rawTime.length === 5 ? rawTime + ':00' : rawTime;
         var editNo = document.getElementById('editAppointmentNo').value;
@@ -1418,7 +1596,10 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
             document.getElementById('appointmentForm').reset();
             resetAppointmentTimeUI();
             document.getElementById('editAppointmentNo').value = '';
+            hideSuggestionsBox();
+            hideExistingPatientTag();
             loadAppointments();
+            loadPatientsForAutocomplete();
             setTimeout(() => {
                 showSection('sec-appointments');
                 resultMsg.style.display = 'none';
@@ -1429,6 +1610,89 @@ const BASE_URL = "http://localhost:8080/Sunrise_Dental_Clinic/resources";
             resultMsg.className = 'error'; resultMsg.style.display = 'block';
             resultMsg.innerHTML = 'Failed to register appointment. ' + err.message;
         });
+    }
+
+    function loadPatientsForAutocomplete() {
+        fetch(BASE_URL + '/patients')
+            .then(res => res.json())
+            .then(data => { cachedPatients = data || []; })
+            .catch(err => console.error("Error preloading patients for autocomplete:", err));
+    }
+
+    function getPatientInitial(name) {
+        return (name || '?').trim().charAt(0).toUpperCase() || '?';
+    }
+
+    function onPatientNameInput() {
+        var input = document.getElementById('patientName');
+        var box = document.getElementById('patientSuggestions');
+        if (!input || !box) return;
+
+        hideExistingPatientTag();
+
+        var query = input.value.trim().toLowerCase();
+        if (!query) { box.classList.remove('show'); box.innerHTML = ''; return; }
+
+        var matches = (cachedPatients || []).filter(p => {
+            var name = (p.patientName || p.patient_name || '').toLowerCase();
+            return name.indexOf(query) !== -1;
+        }).slice(0, 6);
+
+        if (matches.length === 0) {
+            box.innerHTML = '<div class="patient-suggestions-empty">No matching registered patient — this will be added as a new patient.</div>';
+            box.classList.add('show');
+            return;
+        }
+
+        box.innerHTML = matches.map(p => {
+            var id = p.patientId || p.patient_id;
+            var name = p.patientName || p.patient_name || '-';
+            var contact = p.contactNo || p.contact_no || '';
+            var address = p.address || '';
+            var meta = [contact, address].filter(Boolean).join(' • ');
+            return '<div class="patient-suggestion-item" onmousedown="event.preventDefault(); selectPatientSuggestion(' + id + ')">'
+                + '<div class="patient-suggestion-avatar">' + getPatientInitial(name) + '</div>'
+                + '<div class="patient-suggestion-info">'
+                +   '<div class="patient-suggestion-name">' + name + '</div>'
+                +   (meta ? '<div class="patient-suggestion-meta">' + meta + '</div>' : '')
+                + '</div>'
+                + '</div>';
+        }).join('');
+        box.classList.add('show');
+    }
+
+    function selectPatientSuggestion(patientId) {
+        var patient = (cachedPatients || []).find(p => (p.patientId || p.patient_id) === patientId);
+        if (!patient) return;
+
+        document.getElementById('patientName').value = patient.patientName || patient.patient_name || '';
+        document.getElementById('address').value = patient.address || '';
+        document.getElementById('contactNo').value = patient.contactNo || patient.contact_no || '';
+
+        hideSuggestionsBox();
+        showExistingPatientTag();
+    }
+
+    function onPatientNameBlur() {
+        // Small delay so a click on a suggestion registers before the list is hidden.
+        setTimeout(hideSuggestionsBox, 150);
+    }
+
+    function hideSuggestionsBox() {
+        var box = document.getElementById('patientSuggestions');
+        if (box) { box.classList.remove('show'); box.innerHTML = ''; }
+    }
+
+    function showExistingPatientTag() {
+        var tag = document.getElementById('existingPatientTag');
+        if (!tag) return;
+        tag.innerHTML = '✓ Existing patient details auto-filled';
+        tag.classList.add('show');
+    }
+
+    function hideExistingPatientTag() {
+        var tag = document.getElementById('existingPatientTag');
+        if (tag) { tag.classList.remove('show'); tag.innerHTML = ''; }
     }
 
     function loadBillableAppointments() {
