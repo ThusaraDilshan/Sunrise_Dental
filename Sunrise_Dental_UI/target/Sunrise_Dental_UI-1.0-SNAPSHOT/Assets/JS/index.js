@@ -100,3 +100,9 @@ document.addEventListener('DOMContentLoaded', function () {
         showError(urlParams.get('error') || 'Invalid login details!');
     }
 });
+
+const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('error')) {
+        showError(urlParams.get('error') || 'Invalid login details!');
+    }
+});

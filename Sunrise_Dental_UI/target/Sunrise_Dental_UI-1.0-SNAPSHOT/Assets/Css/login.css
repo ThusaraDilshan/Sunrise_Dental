@@ -21,6 +21,13 @@ body {
     z-index: 0;
 }
 
+.bg-anim {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+}
+
 .blob {
     position: absolute;
     border-radius: 50%;
