@@ -1,0 +1,9 @@
+test\NoticeTest.class
+test\StaffTest.class
+test\PatientTest.class
+test\DBConnectionTest.class
+test\AppointmentTest.class
+test\TreatmentTypeTest.class
+test\BillTest.class
+test\DentistTest.class
+test\AppointmentDAOTest.class
