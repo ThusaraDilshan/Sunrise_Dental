@@ -60,7 +60,6 @@ public class PatientDAO {
         return null;
     }
 
-    // Used by Patients Management page (Staff Dashboard)
     public java.util.List<Patient> getAllPatients() {
         java.util.List<Patient> list = new java.util.ArrayList<>();
         String sql = "SELECT patient_id, patient_name, address, contact_no FROM patients ORDER BY patient_name";
@@ -83,7 +82,6 @@ public class PatientDAO {
         return list;
     }
 
-    // Update patient details (used by Edit button on Patients Management page)
     public boolean updatePatient(Patient patient) {
         String sql = "UPDATE patients SET patient_name = ?, address = ?, contact_no = ? WHERE patient_id = ?";
         Connection conn = DBConnection.getInstance().getConnection();

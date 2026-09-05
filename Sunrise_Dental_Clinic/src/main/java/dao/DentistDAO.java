@@ -38,10 +38,6 @@ public class DentistDAO {
         return null;
     }
 
-    // Returns the DB-generated dentist_id on success, or -1 on failure.
-    // Uses RETURN_GENERATED_KEYS the same way PatientDAO/TreatmentDAO/StaffDAO
-    // do, so the caller (DentistResource) can set the real ID on the response
-    // instead of sending back whatever was in the incoming request body.
     public int addDentist(Dentist d) {
         String sql = "INSERT INTO dentists (dentist_name, username, password, specialization, contact_no, consultation_fee) VALUES (?, ?, ?, ?, ?, ?)";
         Connection conn = DBConnection.getInstance().getConnection();

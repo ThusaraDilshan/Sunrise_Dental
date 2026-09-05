@@ -11,7 +11,6 @@ import java.sql.Statement;
 
 public class StaffDAO {
 
-    // Used by LoginServlet / LoginResource to authenticate staff
     public Staff validateLogin(String username, String password) {
         Staff staff = findByUsername(username);
         if (staff != null && staff.getPassword() != null && staff.getPassword().equals(password)) {
@@ -46,8 +45,6 @@ public class StaffDAO {
         return null;
     }
 
-    // Used by Staff Management page (Staff Dashboard). Password is left out
-    // of the list on purpose so it never gets sent to the browser in bulk.
     public java.util.List<Staff> getAllStaff() {
         java.util.List<Staff> list = new java.util.ArrayList<>();
         String sql = "SELECT staff_id, staff_name, username, contact_no, role, created_at " +
@@ -73,7 +70,6 @@ public class StaffDAO {
         return list;
     }
 
-    // Add a new staff member (Admin only - enforced in StaffResource)
     public int createStaff(Staff staff) {
         String sql = "INSERT INTO staff (staff_name, username, password, contact_no, role) " +
                      "VALUES (?, ?, ?, ?, ?)";

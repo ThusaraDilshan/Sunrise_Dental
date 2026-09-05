@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
-Test set: test.LoginResourceTest
+Test set: test.PatientResourceTest
 -------------------------------------------------------------------------------
-Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.909 s -- in test.LoginResourceTest
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.297 s -- in test.PatientResourceTest

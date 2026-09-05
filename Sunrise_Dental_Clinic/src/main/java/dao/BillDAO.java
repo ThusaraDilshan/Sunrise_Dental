@@ -15,9 +15,6 @@ import java.sql.SQLException;
 
 public class BillDAO {
 
-    /**
-     * Checks if a bill already exists for this appointment (avoids duplicate billing).
-     */
     public Bill getBillByAppointmentNo(String appointmentNo) {
         String sql = "SELECT b.*, "
                 + "p.patient_name, p.contact_no, p.address, "
@@ -45,16 +42,6 @@ public class BillDAO {
         return null;
     }
 
-    /**
-     * Requirement 4: Calculate and Print Bill.
-     *
-     * Pulls the treatment cost (from treatment_types) and the dentist's
-     * consultation fee (from dentists) for the given appointment, computes
-     * the total, saves it as a new bill row, and returns the full receipt data.
-     *
-     * If a bill already exists for this appointment, returns the existing one
-     * instead of creating a duplicate.
-     */
     public Bill calculateAndSaveBill(String appointmentNo) {
 
         // 1. Avoid duplicate billing
@@ -63,7 +50,6 @@ public class BillDAO {
             return existing;
         }
 
-        // 2. Pull treatment cost + dentist consultation fee for this appointment
         String lookupSql = "SELECT t.treatment_cost, d.consultation_fee "
                 + "FROM appointments a "
                 + "JOIN dentists d ON a.dentist_id = d.dentist_id "

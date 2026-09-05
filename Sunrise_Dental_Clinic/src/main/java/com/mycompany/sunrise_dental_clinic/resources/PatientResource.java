@@ -7,6 +7,7 @@ import model.Staff;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -27,6 +28,20 @@ public class PatientResource {
     public Response getAllPatients() {
         List<Patient> list = patientDAO.getAllPatients();
         return Response.ok(list).build();
+    }
+
+   @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response addPatient(Patient patient) {
+        int generatedId = patientDAO.createPatient(patient);
+        if (generatedId > 0) {
+            patient.setPatientId(generatedId);
+            return Response.status(Response.Status.CREATED).entity(patient).build();
+        }
+        return Response.status(Response.Status.BAD_REQUEST)
+                .entity("{\"error\":\"Could not add patient\"}")
+                .build();
     }
 
     @PUT

@@ -13,4 +13,7 @@ test\DentistDAOTest.class
 test\BillTest.class
 test\AppointmentDAOTest.class
 test\AppointmentResourceTest.class
+test\NoticeDAOTest.class
+test\TreatmentResourceTest.class
 test\PatientDAOTest.class
+test\PatientResourceTest.class

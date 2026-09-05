@@ -72,13 +72,7 @@ public class DentistResource {
                 .type(MediaType.APPLICATION_JSON)
                 .build();
     }
-
-    // Self-service: a logged-in dentist updates their OWN profile.
-    // No admin check here - the frontend always calls this with the dentist's
-    // own loggedDentistId, so they can only ever touch their own row.
-    // Reuses updateDentist(Dentist), which already leaves username/password
-    // untouched in the SQL when they are null/blank - so an empty password
-    // field on the form means "keep the current password".
+    
     @POST
     @Path("/{id}/profile")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -109,8 +103,6 @@ public class DentistResource {
                     .build();
         }
 
-        // username left as null on purpose: updateDentist() only touches the
-        // username column when it's non-blank, so this form can never change it.
         Dentist dentist = new Dentist(
                 id,
                 dentistName.trim(),
@@ -134,8 +126,6 @@ public class DentistResource {
                 .build();
     }
 
-    // Only an Admin account may delete a dentist.
-    // glassFish 403 Forbidden issue bypass කිරීම සඳහා POST Endpoint එකක් භාවිතා කර ඇත
     @POST
     @Path("/delete/{id}")
     @Produces(MediaType.APPLICATION_JSON)

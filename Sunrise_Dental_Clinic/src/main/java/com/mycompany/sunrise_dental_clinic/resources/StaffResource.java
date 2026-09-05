@@ -20,7 +20,6 @@ public class StaffResource {
 
     private final StaffDAO staffDAO = new StaffDAO();
 
-    // Anyone logged in to the dashboard can see the staff list
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllStaff() {
@@ -28,8 +27,6 @@ public class StaffResource {
         return Response.ok(list).build();
     }
 
-    // Used by the dashboard on load to find out who is logged in and what
-    // their role is (so it knows whether to show the Admin-only controls).
     @GET
     @Path("/username/{username}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -40,11 +37,10 @@ public class StaffResource {
                     .entity("{\"error\":\"Staff member not found\"}")
                     .build();
         }
-        staff.setPassword(null); // never send the password hash to the browser
+        staff.setPassword(null);
         return Response.ok(staff).build();
     }
 
-    // Only an Admin account may add new staff members.
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
