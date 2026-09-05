@@ -21,10 +21,10 @@ CREATE TABLE `patients` (
 
 LOCK TABLES `patients` WRITE;
 INSERT INTO `patients` VALUES 
-(1,'Kamal','58/18/A,Swarna road,Colombo','071846987','2026-08-19 20:50:48'),
-(2,'Jayamaha','58/15,galle road,Colombo','07752321545','2026-08-20 09:40:53'),
-(3,'Abeysinghe','89,Helan Lane,colombo','0755889640','2026-08-20 09:41:35'),
-(4,'Anil Jayasinghe','58/15, Sarana Road, Malabe','0755889645','2026-08-20 09:44:00');
+(1,'Mr.Kamal Perera','58/18/A,Swarna road,Colombo','071846987','2026-08-19 20:50:48'),
+(2,'Mrs.Chamila Jayamaha','58/15,galle road,Colombo','07752321545','2026-08-20 09:40:53'),
+(3,'Mr.Manoj Abeysinghe','89,Helan Lane,colombo','0755889640','2026-08-20 09:41:35'),
+(4,'Mr.Anil Jayasinghe','58/15, Sarana Road, Malabe','0755889645','2026-08-20 09:44:00');
 UNLOCK TABLES;
 
 --
@@ -50,11 +50,10 @@ CREATE TABLE `staff` (
 
 LOCK TABLES `staff` WRITE;
 INSERT INTO `staff` VALUES 
-(2,'Super Admin','admin','admin123','0775801800','ADMIN','2026-08-19 20:43:47'),
-(4,'Admin 1','admin1','jagath123','0775815493','ADMIN','2026-08-19 22:39:49'),
-(5,'Thehara Saduni','saduni1','saduni123','0775815487','COORDINATOR','2026-08-19 22:42:33'),
-(6,'shehara hansani','hansani1','hansani123','0775956332','RECEPTIONIST','2026-08-19 22:43:16'),
-(7,'Nehan Vidulak','nehan1','nehan123','0779696851','TECHNOLOGIST','2026-08-19 22:43:48');
+(1,'Super Admin','admin','admin123','0775801800','ADMIN','2026-08-19 20:43:47'),
+(2,'Admin 1','admin1','jagath123','0775815493','ADMIN','2026-08-19 22:39:49'),
+(3,'shehara hansani','hansani1','hansani123','0775956332','RECEPTIONIST','2026-08-19 22:43:16'),
+(4,'nehara jayamini','nehara1','nehara123','077595986','RECEPTIONIST','2026-08-19 22:43:16');
 UNLOCK TABLES;
 
 --
@@ -81,8 +80,8 @@ CREATE TABLE `dentists` (
 
 LOCK TABLES `dentists` WRITE;
 INSERT INTO `dentists` VALUES 
-(1,'Dr. Nimal Perera','dr.nimal','dent123','General Dentistry','0771234567',1500.00,'2026-08-19 20:43:47'),
-(2,'Dr. Kamala Silva','dr.kamala','dent456','Orthodontics','0777654321',2000.00,'2026-08-19 20:43:47');
+(1,'Dr. Shevon Perera','dr.shevon','shevon123','General Dentistry','0771234567',1500.00,'2026-08-19 20:43:47'),
+(2,'Dr. Ajantha De Silva','dr.ajantha','ajantha123','Orthodontics','0777654321',2000.00,'2026-08-19 20:43:47');
 UNLOCK TABLES;
 
 --
@@ -108,7 +107,7 @@ INSERT INTO `treatment_types` VALUES
 (3,'Root Canal Treatment',15000.00),
 (4,'Teeth Cleaning (Scaling)',2500.00),
 (5,'Braces Fitting',45000.00),
-(7,'Inlays and onlays',4500.00);
+(6,'Inlays and onlays',4500.00);
 UNLOCK TABLES;
 
 --
@@ -144,7 +143,7 @@ CREATE TABLE `appointments` (
 LOCK TABLES `appointments` WRITE;
 INSERT INTO `appointments` VALUES 
 ('APT0001',1,2,5,'admin','2026-08-22','10:25:00','COMPLETED','2026-08-19 20:50:48'),
-('APT0002',2,2,7,'admin','2026-08-20','04:30:00','COMPLETED','2026-08-20 09:40:53'),
+('APT0002',2,2,6,'admin','2026-08-20','04:30:00','COMPLETED','2026-08-20 09:40:53'),
 ('APT0003',3,2,5,'admin','2026-08-20','05:20:00','COMPLETED','2026-08-20 09:41:35'),
 ('APT0004',4,2,4,'admin','2026-08-22','10:02:00','CANCELLED','2026-08-20 09:44:00');
 UNLOCK TABLES;
