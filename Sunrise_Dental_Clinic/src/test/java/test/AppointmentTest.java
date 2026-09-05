@@ -46,15 +46,20 @@ class AppointmentTest {
         assertEquals(status, appointment.getStatus());
     }
 
+    /**
+     * Database එකේ Foreign Key Relational Data (Patient Name + Treatment Name + Dentist Fee) 
+     * Model එකට mapping වීම පරීක්ෂා කිරීම:
+     * Example: APT0001 -> Patient: Mr. Kamal Perera | Treatment: Braces Fitting (45000.0) | Dentist: Dr. Shevon De Silva (8700.0)
+     */
     @Test
     @DisplayName("Test Mapped Relational Database Fields for Appointment")
     void testAppointmentRelationalMapping() {
         appointment.setAppointmentNo("APT0001");
-        appointment.setPatientName("Mr. vimal Perera");
+        appointment.setPatientName("Mr. Kamal Perera");
         appointment.setTreatmentName("Braces Fitting");
         appointment.setTreatmentCost(45000.00);
         appointment.setDentistName("Dr. Shevon De Silva");
-        appointment.setConsultationFee(9600.00);
+        appointment.setConsultationFee(8700.00);
 
         assertEquals("APT0001", appointment.getAppointmentNo());
         assertEquals("Mr. Kamal Perera", appointment.getPatientName());

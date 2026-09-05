@@ -15,7 +15,6 @@ class DBConnectionTest {
 
     @BeforeEach
     void resetSingleton() throws Exception {
-        // Singleton Instance එකක් සෑම Test එකකටම පෙර Reset කිරීමට Reflection භාවිතා කරයි
         Field instanceField = DBConnection.class.getDeclaredField("instance");
         instanceField.setAccessible(true);
         instanceField.set(null, null);
@@ -25,7 +24,7 @@ class DBConnectionTest {
     @DisplayName("Test: Singleton instance creation")
     void testGetInstanceReturnsNotNull() {
         DBConnection instance1 = DBConnection.getInstance();
-        assertNotNull(instance1, "DBConnection instance එක null නොවිය යුතුය.");
+        assertNotNull(instance1, "DBConnection instance null.");
     }
 
     @Test
@@ -34,7 +33,7 @@ class DBConnectionTest {
         DBConnection instance1 = DBConnection.getInstance();
         DBConnection instance2 = DBConnection.getInstance();
 
-        assertSame(instance1, instance2, "getInstance() මගින් සැමවිටම එකම instance එක ලබා දිය යුතුය.");
+        assertSame(instance1, instance2, "getInstance()instance.");
     }
 
     @Test
@@ -43,7 +42,7 @@ class DBConnectionTest {
         DBConnection dbConnection = DBConnection.getInstance();
         Connection connection = dbConnection.getConnection();
 
-        assertNotNull(connection, "Connection object එක null නොවිය යුතුය.");
-        assertFalse(connection.isClosed(), "Database connection එක active තත්වයේ පැවතිය යුතුය.");
+        assertNotNull(connection, "Connection object null.");
+        assertFalse(connection.isClosed(), "Database connection active.");
     }
 }

@@ -36,7 +36,6 @@ public class LoginResource {
         }
 
         try {
-            // 1. Check Staff Login
             Staff staff = staffDAO.validateLogin(username, password);
             if (staff != null) {
                 String staffRole = staff.getRole() != null ? staff.getRole().toUpperCase() : "STAFF";
@@ -46,7 +45,6 @@ public class LoginResource {
                 return Response.ok(result).build();
             }
 
-            // 2. Check Dentist Login
             Dentist dentist = dentistDAO.validateLogin(username, password);
             if (dentist != null) {
                 result.put("status", "success");
@@ -56,7 +54,6 @@ public class LoginResource {
                 return Response.ok(result).build();
             }
 
-            // Invalid Login
             result.put("status", "error");
             result.put("message", "Invalid username or password.");
             return Response.status(Response.Status.UNAUTHORIZED).entity(result).build();

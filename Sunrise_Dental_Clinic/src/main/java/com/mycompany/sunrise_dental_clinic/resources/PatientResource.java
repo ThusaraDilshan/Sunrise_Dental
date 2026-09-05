@@ -29,7 +29,6 @@ public class PatientResource {
         return Response.ok(list).build();
     }
 
-    // Any logged-in staff member may edit a patient's details.
     @PUT
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -45,7 +44,6 @@ public class PatientResource {
                 .build();
     }
 
-    // Only an Admin account may delete a patient.
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)

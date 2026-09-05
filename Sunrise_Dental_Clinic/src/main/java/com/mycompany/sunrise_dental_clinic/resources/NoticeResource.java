@@ -18,7 +18,6 @@ public class NoticeResource {
 
     private final NoticeDAO noticeDAO = new NoticeDAO();
 
-    // Staff -> POST api/notice  { dentistId, description, sentBy }
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -44,7 +43,6 @@ public class NoticeResource {
                 .build();
     }
 
-    // Dentist side -> GET api/notice/dentist/{dentistId}
     @GET
     @Path("/dentist/{dentistId}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -53,7 +51,6 @@ public class NoticeResource {
         return Response.ok(notices).build();
     }
 
-    // Dentist side -> PUT api/notice/{noticeId}/read
     @PUT
     @Path("/{noticeId}/read")
     @Produces(MediaType.APPLICATION_JSON)

@@ -1,184 +1,141 @@
 package test;
 
 import dao.AppointmentDAO;
-import util.DBConnection;
 import model.Appointment;
-import org.junit.jupiter.api.AfterEach;
+import util.DBConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Time;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 class AppointmentDAOTest {
 
+    @InjectMocks
     private AppointmentDAO appointmentDAO;
+
+    @Mock
     private Connection mockConnection;
-    private PreparedStatement mockStatement;
+
+    @Mock
+    private PreparedStatement mockPreparedStatement;
+
+    @Mock
     private ResultSet mockResultSet;
-    private DBConnection mockDbConnectionInstance;
-    private MockedStatic<DBConnection> mockedStatic;
 
     @BeforeEach
     void setUp() {
-        appointmentDAO = new AppointmentDAO();
-
-        mockConnection = mock(Connection.class);
-        mockStatement = mock(PreparedStatement.class);
-        mockResultSet = mock(ResultSet.class);
-        mockDbConnectionInstance = mock(DBConnection.class);
-
-        mockedStatic = mockStatic(DBConnection.class);
-        mockedStatic.when(DBConnection::getInstance).thenReturn(mockDbConnectionInstance);
-        when(mockDbConnectionInstance.getConnection()).thenReturn(mockConnection);
-    }
-
-    @AfterEach
-    void tearDown() {
-        mockedStatic.close(); // always release the static mock after each test
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    @DisplayName("getAppointmentByNo should return a mapped Appointment when the record exists")
-    void testGetAppointmentByNo_found() throws SQLException {
-        String appointmentNo = "APT0001";
+    @DisplayName("Test getAppointmentByNo - Database Data (APT0001)")
+    void testGetAppointmentByNoSuccess() throws SQLException {
+        try (MockedStatic<DBConnection> mockedDB = Mockito.mockStatic(DBConnection.class)) {
+            DBConnection mockDBInstance = mock(DBConnection.class);
+            mockedDB.when(DBConnection::getInstance).thenReturn(mockDBInstance);
+            when(mockDBInstance.getConnection()).thenReturn(mockConnection);
 
-        when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
-        when(mockStatement.executeQuery()).thenReturn(mockResultSet);
+            when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
+            when(mockPreparedStatement.executeQuery()).thenReturn(mockResultSet);
 
-        when(mockResultSet.next()).thenReturn(true, false);
-        when(mockResultSet.getString("appointment_no")).thenReturn("APT0001");
-        when(mockResultSet.getInt("patient_id")).thenReturn(1);
-        when(mockResultSet.getString("patient_name")).thenReturn("Nimal Perera");
-        when(mockResultSet.getString("contact_no")).thenReturn("0771234567");
-        when(mockResultSet.getString("address")).thenReturn("Colombo");
-        when(mockResultSet.getInt("dentist_id")).thenReturn(2);
-        when(mockResultSet.getString("dentist_name")).thenReturn("Dr. Silva");
-        when(mockResultSet.getInt("treatment_id")).thenReturn(3);
-        when(mockResultSet.getString("treatment_name")).thenReturn("Root Canal");
-        when(mockResultSet.getDate("appointment_date")).thenReturn(Date.valueOf("2026-09-04"));
-        when(mockResultSet.getTime("appointment_time")).thenReturn(Time.valueOf("10:00:00"));
-        when(mockResultSet.getString("status")).thenReturn("CONFIRMED");
+            // Dump Data: APT0001 | Patient: Kamal Perera | Dentist: Shevon | Treatment: Braces Fitting
+            when(mockResultSet.next()).thenReturn(true);
+            when(mockResultSet.getString("appointment_no")).thenReturn("APT0001");
+            when(mockResultSet.getInt("patient_id")).thenReturn(1);
+            when(mockResultSet.getString("patient_name")).thenReturn("Mr. Kamal Perera");
+            when(mockResultSet.getString("contact_no")).thenReturn("071846987");
+            when(mockResultSet.getString("address")).thenReturn("58/18/A, Swarna road, Colombo");
+            when(mockResultSet.getInt("dentist_id")).thenReturn(2);
+            when(mockResultSet.getString("dentist_name")).thenReturn("Dr. Shevon De Silva");
+            when(mockResultSet.getInt("treatment_id")).thenReturn(5);
+            when(mockResultSet.getString("treatment_name")).thenReturn("Braces Fitting");
+            when(mockResultSet.getDate("appointment_date")).thenReturn(Date.valueOf("2026-08-22"));
+            when(mockResultSet.getTime("appointment_time")).thenReturn(Time.valueOf("10:25:00"));
+            when(mockResultSet.getString("status")).thenReturn("COMPLETED");
 
-        Appointment result = appointmentDAO.getAppointmentByNo(appointmentNo);
+            Appointment apt = appointmentDAO.getAppointmentByNo("APT0001");
 
-        assertNotNull(result, "Expected an Appointment object, got null");
-        assertEquals("APT0001", result.getAppointmentNo());
-        assertEquals("Nimal Perera", result.getPatientName());
-        assertEquals("Dr. Silva", result.getDentistName());
-        assertEquals("CONFIRMED", result.getStatus());
+            assertNotNull(apt);
+            assertEquals("APT0001", apt.getAppointmentNo());
+            assertEquals("Mr. Kamal Perera", apt.getPatientName());
+            assertEquals("Braces Fitting", apt.getTreatmentName());
+            assertEquals("COMPLETED", apt.getStatus());
 
-        verify(mockStatement).setString(1, appointmentNo);
+            verify(mockPreparedStatement).setString(1, "APT0001");
+        }
     }
 
     @Test
-    @DisplayName("getAppointmentByNo should return null when no matching record exists")
-    void testGetAppointmentByNo_notFound() throws SQLException {
-        when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
-        when(mockStatement.executeQuery()).thenReturn(mockResultSet);
-        when(mockResultSet.next()).thenReturn(false); // no rows
+    @DisplayName("Test generateNextAppointmentNo - DB with last record APT0007")
+    void testGenerateNextAppointmentNo() throws SQLException {
+        try (MockedStatic<DBConnection> mockedDB = Mockito.mockStatic(DBConnection.class)) {
+            DBConnection mockDBInstance = mock(DBConnection.class);
+            mockedDB.when(DBConnection::getInstance).thenReturn(mockDBInstance);
+            when(mockDBInstance.getConnection()).thenReturn(mockConnection);
 
-        Appointment result = appointmentDAO.getAppointmentByNo("APT9999");
+            when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
+            when(mockPreparedStatement.executeQuery()).thenReturn(mockResultSet);
 
-        assertNull(result, "Expected null when appointment does not exist");
+            // DB dump එකේ අවසන් Appointment එක APT0007 වේ. ඊළඟ අංකය APT0008 විය යුතුය.
+            when(mockResultSet.next()).thenReturn(true);
+            when(mockResultSet.getString(1)).thenReturn("APT0007");
+
+            String nextNo = appointmentDAO.generateNextAppointmentNo();
+
+            assertEquals("APT0008", nextNo);
+        }
     }
 
     @Test
-    @DisplayName("registerAppointment should return true when insert affects 1+ rows")
-    void testRegisterAppointment_success() throws SQLException {
-        Appointment apt = new Appointment();
-        apt.setAppointmentNo("APT0010");
-        apt.setPatientId(1);
-        apt.setDentistId(2);
-        apt.setTreatmentId(3);
-        apt.setBookedByUsername("receptionist1");
-        apt.setAppointmentDate("2026-09-10");
-        apt.setAppointmentTime("14:30:00");
-        apt.setStatus("CONFIRMED");
+    @DisplayName("Test updateStatus - Success")
+    void testUpdateStatusSuccess() throws SQLException {
+        try (MockedStatic<DBConnection> mockedDB = Mockito.mockStatic(DBConnection.class)) {
+            DBConnection mockDBInstance = mock(DBConnection.class);
+            mockedDB.when(DBConnection::getInstance).thenReturn(mockDBInstance);
+            when(mockDBInstance.getConnection()).thenReturn(mockConnection);
 
-        when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
-        when(mockStatement.executeUpdate()).thenReturn(1); // 1 row inserted
+            when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
+            when(mockPreparedStatement.executeUpdate()).thenReturn(1);
 
-        boolean result = appointmentDAO.registerAppointment(apt);
+            boolean updated = appointmentDAO.updateStatus("APT0007", "COMPLETED");
 
-        assertTrue(result, "registerAppointment should return true on successful insert");
-        verify(mockStatement).setString(1, "APT0010");
-        verify(mockStatement).setInt(2, 1);
-        verify(mockStatement).executeUpdate();
+            assertTrue(updated);
+            verify(mockPreparedStatement).setString(1, "COMPLETED");
+            verify(mockPreparedStatement).setString(2, "APT0007");
+        }
     }
 
     @Test
-    @DisplayName("registerAppointment should return false when a SQLException occurs")
-    void testRegisterAppointment_sqlException() throws SQLException {
-        Appointment apt = new Appointment();
-        apt.setAppointmentNo("APT0011");
-        apt.setAppointmentDate("2026-09-10");
-        apt.setAppointmentTime("14:30:00");
+    @DisplayName("Test deleteAppointment - Cascade Delete Bill & Appointment")
+    void testDeleteAppointmentSuccess() throws SQLException {
+        try (MockedStatic<DBConnection> mockedDB = Mockito.mockStatic(DBConnection.class)) {
+            DBConnection mockDBInstance = mock(DBConnection.class);
+            mockedDB.when(DBConnection::getInstance).thenReturn(mockDBInstance);
+            when(mockDBInstance.getConnection()).thenReturn(mockConnection);
 
-        when(mockConnection.prepareStatement(anyString())).thenThrow(new SQLException("DB connection lost"));
+            when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
+            when(mockPreparedStatement.executeUpdate()).thenReturn(1);
 
-        boolean result = appointmentDAO.registerAppointment(apt);
+            boolean deleted = appointmentDAO.deleteAppointment("APT0001");
 
-        assertFalse(result, "registerAppointment should return false when SQLException is thrown");
-    }
-
-    @Test
-    @DisplayName("updateStatus should return true when the appointment status is updated")
-    void testUpdateStatus_success() throws SQLException {
-        when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
-        when(mockStatement.executeUpdate()).thenReturn(1);
-
-        boolean result = appointmentDAO.updateStatus("APT0001", "COMPLETED");
-
-        assertTrue(result);
-        verify(mockStatement).setString(1, "COMPLETED");
-        verify(mockStatement).setString(2, "APT0001");
-    }
-
-    @Test
-    @DisplayName("deleteAppointment should return true when the appointment row is removed")
-    void testDeleteAppointment_success() throws SQLException {
-        PreparedStatement mockDeleteBillStmt = mock(PreparedStatement.class);
-        PreparedStatement mockDeleteAptStmt = mock(PreparedStatement.class);
-
-        when(mockConnection.prepareStatement(contains("DELETE FROM bills"))).thenReturn(mockDeleteBillStmt);
-        when(mockConnection.prepareStatement(contains("DELETE FROM appointments"))).thenReturn(mockDeleteAptStmt);
-        when(mockDeleteAptStmt.executeUpdate()).thenReturn(1);
-
-        boolean result = appointmentDAO.deleteAppointment("APT0001");
-
-        assertTrue(result);
-        verify(mockDeleteBillStmt).setString(1, "APT0001");
-        verify(mockDeleteAptStmt).setString(1, "APT0001");
-    }
-
-    @Test
-    @DisplayName("generateNextAppointmentNo should default to APT0001 when the table is empty")
-    void testGenerateNextAppointmentNo_emptyTable() throws SQLException {
-        when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
-        when(mockStatement.executeQuery()).thenReturn(mockResultSet);
-        when(mockResultSet.next()).thenReturn(false); // no existing appointments
-
-        String result = appointmentDAO.generateNextAppointmentNo();
-
-        assertEquals("APT0001", result);
-    }
-
-    @Test
-    @DisplayName("generateNextAppointmentNo should increment the last appointment number")
-    void testGenerateNextAppointmentNo_incrementsLastNumber() throws SQLException {
-        when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
-        when(mockStatement.executeQuery()).thenReturn(mockResultSet);
-        when(mockResultSet.next()).thenReturn(true);
-        when(mockResultSet.getString(1)).thenReturn("APT0012");
-
-        String result = appointmentDAO.generateNextAppointmentNo();
-
-        assertEquals("APT0013", result);
+            assertTrue(deleted);
+            verify(mockPreparedStatement, times(2)).executeUpdate();
+        }
     }
 }

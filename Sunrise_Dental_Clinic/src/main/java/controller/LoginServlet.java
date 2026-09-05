@@ -49,7 +49,7 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        // 2. Try DENTIST login
+        // 2. DENTIST login
         Dentist dentist = dentistDAO.validateLogin(username, password);
         if (dentist != null) {
             session.setAttribute("loggedInUser", dentist);
@@ -62,7 +62,6 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        // 3. Invalid credentials
         String errorMsg = URLEncoder.encode("Invalid username or password.", StandardCharsets.UTF_8);
         response.sendRedirect("index.html?error=" + errorMsg);
     }
