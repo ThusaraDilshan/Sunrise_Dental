@@ -1,29 +1,19 @@
 CREATE DATABASE IF NOT EXISTS `sunrise_db`;
 USE `sunrise_db`;
 
--- Foreign Key Checks තාවකාලිකව Disable කිරීම
-SET FOREIGN_KEY_CHECKS = 0;
-
--- 1. Patients Table
-DROP TABLE IF EXISTS `patients`;
 CREATE TABLE `patients` (
   `patient_id` int NOT NULL AUTO_INCREMENT,
   `patient_name` varchar(100) NOT NULL,
   `address` varchar(255) DEFAULT NULL,
   `contact_no` varchar(15) NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`patient_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  PRIMARY KEY (`patient_id`);
 
 INSERT INTO `patients` VALUES 
 (1,'Mr. Kamal Perera','58/18/A, Swarna road, Colombo','071846987','2026-08-19 15:20:48'),
 (2,'Mr. Sunil Jayamaha Updated','58/15, Galle road,Colombo','07752321545','2026-08-20 04:10:53'),
 (3,'Mr. Shehan Abeysinghe','89, Helan Lane, Colombo','0755889640','2026-08-20 04:11:35'),
 (4,'Mr. Anil Jayasinghe','58/15, Sarana Road, Malabe','0755889645','2026-08-20 04:14:00'),
-(5,'Mrs. Chamila De Silva','58/19/A, Galle Road, Negombo.','0775894562','2026-09-01 10:17:32'),
-(6,'djmfdfd','dfdfdf','2626462642','2026-09-02 09:28:30'),
-(7,'mksfs','gdgds','151152532','2026-09-02 09:38:58'),
-(8,'fdfdfd','dfdfdfd','05151515','2026-09-02 10:32:35');
 
 -- 2. Dentists Table
 DROP TABLE IF EXISTS `dentists`;
@@ -37,8 +27,7 @@ CREATE TABLE `dentists` (
   `consultation_fee` decimal(10,2) NOT NULL DEFAULT '1500.00',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`dentist_id`),
-  UNIQUE KEY `username` (`username`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  UNIQUE KEY `username` (`username`);
 
 INSERT INTO `dentists` VALUES 
 (1,'Dr. Shehan Jayasinghe','dr.shehan','shehan123','General Dentistry','0771234567',7580.00,'2026-08-19 15:13:47'),
@@ -61,7 +50,7 @@ CREATE TABLE `staff` (
 INSERT INTO `staff` VALUES 
 (1,'Admin User','admin','admin123','0112345678','ADMIN','2026-08-19 15:13:47'),
 (2,'Admin 1','admin1','jagath123','0775815493','ADMIN','2026-08-19 17:09:49'),
-(6,'Shehara Hansani','shehara01','shehara123','0779696856','RECEPTIONIST','2026-09-01 17:32:00');
+(3,'Shehara Hansani','shehara01','shehara123','0779696856','RECEPTIONIST','2026-09-01 17:32:00');
 
 -- 4. Treatment Types Table
 DROP TABLE IF EXISTS `treatment_types`;
@@ -108,9 +97,7 @@ INSERT INTO `appointments` VALUES
 ('APT0002',2,2,6,'admin','2026-08-20','16:30:00','COMPLETED','2026-08-20 04:10:53'),
 ('APT0003',3,2,5,'admin','2026-08-20','17:00:00','COMPLETED','2026-08-20 04:11:35'),
 ('APT0004',4,2,4,'admin','2026-08-22','10:02:00','CANCELLED','2026-08-20 04:14:00'),
-('APT0005',6,2,5,'admin','2026-09-03','16:59:00','COMPLETED','2026-09-02 09:28:30'),
-('APT0006',7,2,4,'admin','2026-09-02','15:45:00','CANCELLED','2026-09-02 09:38:58'),
-('APT0007',8,1,6,'admin','2026-09-02','16:39:00','PENDING','2026-09-02 10:32:35');
+
 
 -- 6. Bills Table
 DROP TABLE IF EXISTS `bills`;
@@ -129,7 +116,7 @@ CREATE TABLE `bills` (
 INSERT INTO `bills` VALUES 
 (1,'APT0001',45000.00,2000.00,47000.00,'2026-08-19 15:53:12'),
 (2,'APT0002',4500.00,2000.00,6500.00,'2026-08-20 04:21:56'),
-(4,'APT0005',45000.00,8700.00,53700.00,'2026-09-02 10:00:21');
+(3,'APT0005',45000.00,8700.00,53700.00,'2026-09-02 10:00:21');
 
 -- 7. Notices Table
 DROP TABLE IF EXISTS `notices`;
